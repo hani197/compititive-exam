@@ -1,0 +1,9 @@
+django==4.2.29
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+psycopg2-binary==2.9.11
+python-decouple==3.8
+anthropic==0.84.0
+pillow==11.3.0
+django-filter==25.1

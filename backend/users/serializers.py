@@ -1,0 +1,48 @@
+from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from .models import User, RegistrationRequest
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name',
+                  'password', 'password2', 'role', 'phone', 'date_of_birth']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name',
+                  'role', 'phone', 'date_of_birth', 'profile_picture',
+                  'created_at', 'is_staff']
+        read_only_fields = ['id', 'created_at', 'is_staff']
+
+
+class RegistrationRequestSerializer(serializers.ModelSerializer):
+    exam_interested_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RegistrationRequest
+        fields = ['id', 'full_name', 'role', 'email', 'phone', 'exam_interested',
+                  'exam_interested_name', 'message', 'status', 'requested_at']
+        read_only_fields = ['id', 'status', 'requested_at']
+
+    def get_exam_interested_name(self, obj):
+        return obj.exam_interested.name if obj.exam_interested else None

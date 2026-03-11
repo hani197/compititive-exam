@@ -1,0 +1,183 @@
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { Box, TextField, Button, Typography, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import PersonIcon from '@mui/icons-material/Person';
+import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { useAuth } from '@/context/AuthContext';
+
+const EXAMS = ['EAMCET', 'DSC', 'Civils', 'Group Services', 'CEEP', 'ECET'];
+const COLORS = ['#f97316', '#a855f7', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
+
+export default function LoginPage() {
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const u = await login(form.username, form.password);
+      if (u.role === 'admin' || u.is_staff) router.push('/admin/requests');
+      else router.push('/dashboard');
+    } catch {
+      setError('Invalid username or password.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box sx={{ minHeight: '100vh', display: 'flex' }}>
+      {/* Left — vibrant gradient panel */}
+      <Box sx={{
+        display: { xs: 'none', md: 'flex' },
+        width: '48%',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(145deg, #1e0546 0%, #4c1d95 40%, #7c3aed 75%, #a855f7 100%)',
+        p: 6,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Decorative blobs */}
+        <Box sx={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(168,85,247,0.25)', filter: 'blur(40px)' }} />
+        <Box sx={{ position: 'absolute', bottom: -80, left: -40, width: 280, height: 280, borderRadius: '50%', background: 'rgba(249,115,22,0.2)', filter: 'blur(50px)' }} />
+
+        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+          <Box sx={{
+            width: 80, height: 80, mx: 'auto',
+            background: 'rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: 4, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', mb: 3,
+          }}>
+            <SchoolIcon sx={{ fontSize: 44, color: '#fff' }} />
+          </Box>
+          <Typography variant="h3" fontWeight={900} color="#fff" mb={1} letterSpacing={-1}>
+            EduCoach
+          </Typography>
+          <Typography color="rgba(255,255,255,0.7)" mb={5} fontSize="1.05rem">
+            Competitive Exam Training Platform
+          </Typography>
+
+          {/* Exam pills */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, justifyContent: 'center', maxWidth: 340 }}>
+            {EXAMS.map((exam, i) => (
+              <Box key={exam} sx={{
+                px: 2.5, py: 1,
+                borderRadius: 10,
+                background: `${COLORS[i]}30`,
+                border: `1.5px solid ${COLORS[i]}60`,
+                backdropFilter: 'blur(10px)',
+                display: 'flex', alignItems: 'center', gap: 1,
+              }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: COLORS[i] }} />
+                <Typography fontWeight={700} color="#fff" fontSize="0.85rem">{exam}</Typography>
+              </Box>
+            ))}
+          </Box>
+
+          <Box sx={{
+            mt: 5, px: 3, py: 2,
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 3, backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', gap: 1.5,
+          }}>
+            <AutoAwesomeIcon sx={{ color: '#fbbf24', fontSize: 20 }} />
+            <Typography color="rgba(255,255,255,0.85)" fontSize="0.85rem" textAlign="left">
+              AI-generated papers · Smart evaluation<br />· Detailed analytics
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Right — login form */}
+      <Box sx={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'linear-gradient(160deg, #f5f0ff 0%, #fdf4ff 50%, #fff 100%)',
+        p: 3,
+      }}>
+        <Box sx={{ width: '100%', maxWidth: 400 }}>
+          {/* Mobile brand */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1.5, mb: 4, justifyContent: 'center' }}>
+            <Box sx={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', borderRadius: 2.5, p: 1.2, display: 'flex' }}>
+              <SchoolIcon sx={{ color: '#fff', fontSize: 24 }} />
+            </Box>
+            <Typography variant="h5" fontWeight={800} sx={{ background: 'linear-gradient(135deg, #5b21b6, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              EduCoach
+            </Typography>
+          </Box>
+
+          <Typography variant="h4" fontWeight={800} mb={0.5}
+            sx={{ background: 'linear-gradient(135deg, #3b0764, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Welcome back!
+          </Typography>
+          <Typography color="text.secondary" mb={4} fontWeight={500}>
+            Sign in to continue your journey
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setError('')}>{error}</Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth label="Username" margin="normal"
+              value={form.username}
+              onChange={e => setForm({ ...form, username: e.target.value })}
+              required autoFocus
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><PersonIcon sx={{ color: '#a78bfa', fontSize: 20 }} /></InputAdornment>,
+              }}
+            />
+            <TextField
+              fullWidth label="Password" type={showPass ? 'text' : 'password'} margin="normal"
+              value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              required
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: '#a78bfa', fontSize: 20 }} /></InputAdornment>,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setShowPass(!showPass)}>
+                      {showPass ? <VisibilityOffIcon fontSize="small" sx={{ color: '#a78bfa' }} /> : <VisibilityIcon fontSize="small" sx={{ color: '#a78bfa' }} />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              fullWidth type="submit" variant="contained" size="large"
+              disabled={loading}
+              sx={{ mt: 3, py: 1.6, fontSize: '1rem', borderRadius: 3 }}
+            >
+              {loading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Sign In'}
+            </Button>
+          </form>
+
+          <Box sx={{ mt: 4, pt: 3, borderTop: '1.5px dashed rgba(167,139,250,0.3)', textAlign: 'center' }}>
+            <Typography variant="body2" color="#7c3aed" fontWeight={500}>
+              New student?{' '}
+              <Button size="small" onClick={() => router.push('/request-access')}
+                sx={{ fontWeight: 800, color: '#5b21b6', p: 0, minWidth: 0, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                Request Access
+              </Button>
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
