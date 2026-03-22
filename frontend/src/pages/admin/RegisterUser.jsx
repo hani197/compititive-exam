@@ -124,9 +124,9 @@ function RegisterUser() {
                   <Typography fontWeight={700}>Personal Details</Typography>
                 </Box>
               </AccordionSummary>
-              <AccordionDetails>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
+              <AccordionDetails sx={{ p: 3 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2.5 }}>
+                  <Box sx={{ gridColumn: 'span 2' }}>
                     <FormControl fullWidth size="small">
                       <InputLabel>Role</InputLabel>
                       <Select value={form.role} label="Role" onChange={set('role')}>
@@ -134,23 +134,21 @@ function RegisterUser() {
                         <MenuItem value="instructor">Instructor</MenuItem>
                       </Select>
                     </FormControl>
-                  </Grid>
-                  <Grid item xs={6}><TextField fullWidth label="First Name" value={form.first_name} onChange={set('first_name')} required size="small" /></Grid>
-                  <Grid item xs={6}><TextField fullWidth label="Last Name" value={form.last_name} onChange={set('last_name')} size="small" /></Grid>
-                  <Grid item xs={6}><TextField fullWidth label={form.role === 'student' ? "Candidate Mobile" : "Phone"} value={form.phone} onChange={set('phone')} required size="small" /></Grid>
-                  <Grid item xs={6}><TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth} onChange={set('date_of_birth')} size="small" InputLabelProps={{ shrink: true }} /></Grid>
+                  </Box>
+                  <TextField fullWidth label="First Name" value={form.first_name} onChange={set('first_name')} required size="small" />
+                  <TextField fullWidth label="Last Name" value={form.last_name} onChange={set('last_name')} size="small" />
+                  <TextField fullWidth label={form.role === 'student' ? "Candidate Mobile" : "Phone"} value={form.phone} onChange={set('phone')} required size="small" />
+                  <TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth} onChange={set('date_of_birth')} size="small" InputLabelProps={{ shrink: true }} />
                   
-                  <Grid item xs={12}>
+                  <Box sx={{ gridColumn: 'span 2' }}>
                     <TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} />
-                  </Grid>
+                  </Box>
                   
                   {form.role === 'student' && (
                     <>
-                      <Grid item xs={12}>
-                        <TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated" />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <FormControl fullWidth size="small" sx={{ minWidth: '100%' }}>
+                      <TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated" />
+                      <Box sx={{ gridColumn: 'span 2' }}>
+                        <FormControl fullWidth size="small">
                           <InputLabel id="exam-type-label">Joining for Exam Coaching</InputLabel>
                           <Select
                             labelId="exam-type-label"
@@ -158,15 +156,14 @@ function RegisterUser() {
                             value={form.exam_type}
                             label="Joining for Exam Coaching"
                             onChange={set('exam_type')}
-                            fullWidth
                           >
                             {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                           </Select>
                         </FormControl>
-                      </Grid>
+                      </Box>
                     </>
                   )}
-                </Grid>
+                </Box>
               </AccordionDetails>
             </Accordion>
 
@@ -179,11 +176,11 @@ function RegisterUser() {
                     <Typography fontWeight={700}>Parent / Guardian Details</Typography>
                   </Box>
                 </AccordionSummary>
-                <AccordionDetails>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}><TextField fullWidth label="Parent / Guardian Name" value={form.parent_name} onChange={set('parent_name')} size="small" /></Grid>
-                    <Grid item xs={12}><TextField fullWidth label="Parent Mobile Number" value={form.parent_phone} onChange={set('parent_phone')} size="small" /></Grid>
-                  </Grid>
+                <AccordionDetails sx={{ p: 3 }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2.5 }}>
+                    <TextField fullWidth label="Parent / Guardian Name" value={form.parent_name} onChange={set('parent_name')} size="small" />
+                    <TextField fullWidth label="Parent Mobile Number" value={form.parent_phone} onChange={set('parent_phone')} size="small" />
+                  </Box>
                 </AccordionDetails>
               </Accordion>
             )}
@@ -196,22 +193,24 @@ function RegisterUser() {
                   <Typography fontWeight={700}>Qualification Section</Typography>
                 </Box>
               </AccordionSummary>
-              <AccordionDetails>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}><TextField fullWidth label="Highest Qualification" value={form.qualification} onChange={set('qualification')} size="small" placeholder="e.g. B.Tech in CSE" /></Grid>
+              <AccordionDetails sx={{ p: 3 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2.5 }}>
+                  <Box sx={{ gridColumn: 'span 2' }}>
+                    <TextField fullWidth label="Highest Qualification" value={form.qualification} onChange={set('qualification')} size="small" placeholder="e.g. B.Tech in CSE" />
+                  </Box>
                   
                   {form.role === 'student' && (
                     <>
-                      <Grid item xs={12}><Typography variant="caption" fontWeight={700} color="text.secondary">10TH CLASS</Typography></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Year of Study" type="number" value={form.tenth_year} onChange={set('tenth_year')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Percentage Obtained" type="number" value={form.tenth_percentage} onChange={set('tenth_percentage')} size="small" /></Grid>
+                      <Box sx={{ gridColumn: 'span 2', mt: 1 }}><Typography variant="caption" fontWeight={700} color="text.secondary">10TH CLASS</Typography></Box>
+                      <TextField fullWidth label="Year of Study" type="number" value={form.tenth_year} onChange={set('tenth_year')} size="small" />
+                      <TextField fullWidth label="Percentage Obtained" type="number" value={form.tenth_percentage} onChange={set('tenth_percentage')} size="small" />
                       
-                      <Grid item xs={12}><Typography variant="caption" fontWeight={700} color="text.secondary">INTERMEDIATE</Typography></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Year of Study" type="number" value={form.intermediate_year} onChange={set('intermediate_year')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Percentage Obtained" type="number" value={form.intermediate_percentage} onChange={set('intermediate_percentage')} size="small" /></Grid>
+                      <Box sx={{ gridColumn: 'span 2', mt: 1 }}><Typography variant="caption" fontWeight={700} color="text.secondary">INTERMEDIATE</Typography></Box>
+                      <TextField fullWidth label="Year of Study" type="number" value={form.intermediate_year} onChange={set('intermediate_year')} size="small" />
+                      <TextField fullWidth label="Percentage Obtained" type="number" value={form.intermediate_percentage} onChange={set('intermediate_percentage')} size="small" />
                       
-                      <Grid item xs={12}><Typography variant="caption" fontWeight={700} color="text.secondary">DEGREE</Typography></Grid>
-                      <Grid item xs={12}>
+                      <Box sx={{ gridColumn: 'span 2', mt: 1 }}><Typography variant="caption" fontWeight={700} color="text.secondary">DEGREE</Typography></Box>
+                      <Box sx={{ gridColumn: 'span 2' }}>
                         <FormControl fullWidth size="small">
                           <InputLabel>Degree Type</InputLabel>
                           <Select value={form.degree_type} label="Degree Type" onChange={set('degree_type')}>
@@ -222,20 +221,22 @@ function RegisterUser() {
                             <MenuItem value="Other">Other</MenuItem>
                           </Select>
                         </FormControl>
-                      </Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Year of Study" type="number" value={form.degree_year} onChange={set('degree_year')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Percentage Obtained" type="number" value={form.degree_percentage} onChange={set('degree_percentage')} size="small" /></Grid>
+                      </Box>
+                      <TextField fullWidth label="Year of Study" type="number" value={form.degree_year} onChange={set('degree_year')} size="small" />
+                      <TextField fullWidth label="Percentage Obtained" type="number" value={form.degree_percentage} onChange={set('degree_percentage')} size="small" />
                     </>
                   )}
 
                   {form.role === 'instructor' && (
                     <>
-                      <Grid item xs={6}><TextField fullWidth label="Experience (Years)" type="number" value={form.experience_years} onChange={set('experience_years')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Faculty Field" value={form.faculty_field} onChange={set('faculty_field')} size="small" placeholder="e.g. Mathematics" /></Grid>
-                      <Grid item xs={12}><TextField fullWidth label="Work History" value={form.work_history} onChange={set('work_history')} size="small" multiline rows={2} placeholder="Previous company/college details" /></Grid>
+                      <TextField fullWidth label="Experience (Years)" type="number" value={form.experience_years} onChange={set('experience_years')} size="small" />
+                      <TextField fullWidth label="Faculty Field" value={form.faculty_field} onChange={set('faculty_field')} size="small" placeholder="e.g. Mathematics" />
+                      <Box sx={{ gridColumn: 'span 2' }}>
+                        <TextField fullWidth label="Work History" value={form.work_history} onChange={set('work_history')} size="small" multiline rows={2} placeholder="Previous company/college details" />
+                      </Box>
                     </>
                   )}
-                </Grid>
+                </Box>
               </AccordionDetails>
             </Accordion>
 
@@ -247,13 +248,13 @@ function RegisterUser() {
                   <Typography fontWeight={700}>Credential Details</Typography>
                 </Box>
               </AccordionSummary>
-              <AccordionDetails>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}><TextField fullWidth label="Username" value={form.username} onChange={set('username')} required size="small" /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Email" type="email" value={form.email} onChange={set('email')} required size="small" /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={set('password')} required size="small" /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Confirm Password" type="password" value={form.password2} onChange={set('password2')} required size="small" /></Grid>
-                </Grid>
+              <AccordionDetails sx={{ p: 3 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2.5 }}>
+                  <TextField fullWidth label="Username" value={form.username} onChange={set('username')} required size="small" />
+                  <TextField fullWidth label="Email" type="email" value={form.email} onChange={set('email')} required size="small" />
+                  <TextField fullWidth label="Password" type="password" value={form.password} onChange={set('password')} required size="small" />
+                  <TextField fullWidth label="Confirm Password" type="password" value={form.password2} onChange={set('password2')} required size="small" />
+                </Box>
               </AccordionDetails>
             </Accordion>
 
