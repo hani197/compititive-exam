@@ -3,7 +3,7 @@ import {
   Box, TextField, Button, Typography, Alert, MenuItem,
   Select, InputLabel, FormControl, Paper, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Chip, Avatar, Grid,
-  Divider, Accordion, AccordionSummary, AccordionDetails
+  Divider, Accordion, AccordionSummary, AccordionDetails, CircularProgress, IconButton
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
@@ -36,6 +36,7 @@ function RegisterUser() {
   const [examTypes, setExamTypes] = useState([]);
   const [expanded, setExpanded] = useState('panel1');
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -43,9 +44,14 @@ function RegisterUser() {
         api.get('/auth/students/'),
         api.get('/exam-types/')
       ]);
-      setUsers(u.data.results || u.data);
-      setExamTypes(e.data.results || e.data);
-    } catch (err) { console.error(err); }
+      setUsers(u.data?.results || u.data || []);
+      setExamTypes(e.data?.results || e.data || []);
+    } catch (err) { 
+      console.error(err); 
+      setError('Failed to load data from server.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -119,7 +125,6 @@ function RegisterUser() {
   const handleEdit = (user) => {
     setEditingId(user.id);
     const editData = { ...emptyForm, ...user };
-    // Password should not be pre-filled
     editData.password = '';
     editData.password2 = '';
     setForm(editData);
@@ -154,6 +159,14 @@ function RegisterUser() {
     instructor: { bg: '#fce7f3', color: '#9d174d', grad: 'linear-gradient(135deg, #db2777, #ec4899)' },
     admin: { bg: '#dbeafe', color: '#1e40af', grad: 'linear-gradient(135deg, #1d4ed8, #3b82f6)' },
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
@@ -358,7 +371,7 @@ function RegisterUser() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {users.map(u => {
+                  {users.length > 0 ? users.map(u => {
                     const rs = roleStyle[u.role] || roleStyle.student;
                     return (
                       <TableRow key={u.id} hover>
@@ -395,10 +408,9 @@ function RegisterUser() {
                         </TableCell>
                       </TableRow>
                     );
-                  })}
-                  {users.length === 0 && (
+                  }) : (
                     <TableRow>
-                      <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                      <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
                         <PeopleIcon sx={{ fontSize: 40, color: '#e2e8f0', mb: 1 }} />
                         <Typography color="text.secondary">No users found</Typography>
                       </TableCell>
