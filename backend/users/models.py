@@ -23,12 +23,16 @@ class User(AbstractUser):
     qualification = models.CharField(max_length=255, blank=True, null=True)
 
     # Student Specific
-    parent_details = models.CharField(max_length=255, blank=True, null=True)
+    parent_name = models.CharField(max_length=200, blank=True, null=True)
+    parent_phone = models.CharField(max_length=15, blank=True, null=True)
     age = models.PositiveIntegerField(null=True, blank=True)
     tenth_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    tenth_year = models.PositiveIntegerField(null=True, blank=True)
     intermediate_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    intermediate_year = models.PositiveIntegerField(null=True, blank=True)
     degree_type = models.CharField(max_length=50, blank=True, null=True) # BSc, BCom, BTech, etc.
     degree_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    degree_year = models.PositiveIntegerField(null=True, blank=True)
 
     # Instructor Specific
     experience_years = models.PositiveIntegerField(null=True, blank=True)
@@ -64,12 +68,16 @@ class RegistrationRequest(models.Model):
     qualification = models.CharField(max_length=255, blank=True, null=True)
     
     # Student specific
-    parent_details = models.CharField(max_length=255, blank=True, null=True)
+    parent_name = models.CharField(max_length=200, blank=True, null=True)
+    parent_phone = models.CharField(max_length=15, blank=True, null=True)
     age = models.PositiveIntegerField(null=True, blank=True)
     tenth_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    tenth_year = models.PositiveIntegerField(null=True, blank=True)
     intermediate_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    intermediate_year = models.PositiveIntegerField(null=True, blank=True)
     degree_type = models.CharField(max_length=50, blank=True, null=True)
     degree_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    degree_year = models.PositiveIntegerField(null=True, blank=True)
 
     # Instructor specific
     experience_years = models.PositiveIntegerField(null=True, blank=True)

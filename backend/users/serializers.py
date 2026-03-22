@@ -11,10 +11,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name',
                   'password', 'password2', 'role', 'phone', 'date_of_birth',
-                  'address', 'qualification', 'parent_details', 'age',
-                  'tenth_percentage', 'intermediate_percentage', 'degree_type',
-                  'degree_percentage', 'experience_years', 'faculty_field',
-                  'work_history']
+                  'address', 'qualification', 'parent_name', 'parent_phone', 'age',
+                  'tenth_percentage', 'tenth_year', 'intermediate_percentage', 
+                  'intermediate_year', 'degree_type', 'degree_percentage', 'degree_year',
+                  'experience_years', 'faculty_field', 'work_history']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -36,8 +36,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name',
                   'role', 'phone', 'date_of_birth', 'profile_picture',
                   'created_at', 'is_staff', 'address', 'qualification',
-                  'parent_details', 'age', 'tenth_percentage',
-                  'intermediate_percentage', 'degree_type', 'degree_percentage',
+                  'parent_name', 'parent_phone', 'age', 'tenth_percentage', 'tenth_year',
+                  'intermediate_percentage', 'intermediate_year', 'degree_type', 
+                  'degree_percentage', 'degree_year',
                   'experience_years', 'faculty_field', 'work_history']
         read_only_fields = ['id', 'created_at', 'is_staff']
 
@@ -50,10 +51,10 @@ class RegistrationRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'full_name', 'role', 'email', 'phone', 'exam_interested',
                   'exam_interested_name', 'centre_name', 'centre_address', 'city',
                   'coaching_centre', 'message', 'status', 'requested_at',
-                  'address', 'qualification', 'parent_details', 'age',
-                  'tenth_percentage', 'intermediate_percentage', 'degree_type',
-                  'degree_percentage', 'experience_years', 'faculty_field',
-                  'work_history']
+                  'address', 'qualification', 'parent_name', 'parent_phone', 'age',
+                  'tenth_percentage', 'tenth_year', 'intermediate_percentage', 
+                  'intermediate_year', 'degree_type', 'degree_percentage', 'degree_year',
+                  'experience_years', 'faculty_field', 'work_history']
         read_only_fields = ['id', 'status', 'requested_at']
 
     def get_exam_interested_name(self, obj):

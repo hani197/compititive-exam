@@ -2,19 +2,26 @@ import { useState, useEffect } from 'react';
 import {
   Box, TextField, Button, Typography, Alert, MenuItem,
   Select, InputLabel, FormControl, Paper, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Chip, Avatar, Grid
+  TableCell, TableContainer, TableHead, TableRow, Chip, Avatar, Grid,
+  Divider, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ContactPageIcon from '@mui/icons-material/ContactPage';
+import SchoolIcon from '@mui/icons-material/School';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
 const emptyForm = { 
   username: '', email: '', first_name: '', last_name: '', password: '', password2: '', 
-  role: 'student', phone: '', address: '', qualification: '',
-  parent_details: '', age: '', tenth_percentage: '', intermediate_percentage: '',
-  degree_type: '', degree_percentage: '', experience_years: '', faculty_field: '', 
-  work_history: '' 
+  role: 'student', phone: '', date_of_birth: '', address: '', qualification: '',
+  parent_name: '', parent_phone: '', age: '', 
+  tenth_percentage: '', tenth_year: '',
+  intermediate_percentage: '', intermediate_year: '',
+  degree_type: '', degree_percentage: '', degree_year: '',
+  experience_years: '', faculty_field: '', work_history: '' 
 };
 
 function RegisterUser() {
@@ -22,6 +29,7 @@ function RegisterUser() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [users, setUsers] = useState([]);
+  const [expanded, setExpanded] = useState('panel1');
 
   const fetchUsers = () => api.get('/auth/students/').then(res => setUsers(res.data.results || res.data));
   useEffect(() => { fetchUsers(); }, []);
@@ -29,10 +37,15 @@ function RegisterUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setSuccess('');
+    if (form.password !== form.password2) {
+      setError("Passwords do not match.");
+      return;
+    }
     try {
       const res = await api.post('/auth/students/register/', form);
       setSuccess('Account created for ' + (res.data.first_name || res.data.username));
       setForm(emptyForm);
+      setExpanded('panel1');
       fetchUsers();
     } catch (err) {
       const data = err.response?.data;
@@ -43,6 +56,9 @@ function RegisterUser() {
   };
 
   const set = f => e => setForm({ ...form, [f]: e.target.value });
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const roleStyle = {
     student: { bg: '#ede9fe', color: '#5b21b6', grad: 'linear-gradient(135deg, #7c3aed, #a855f7)' },
@@ -51,7 +67,7 @@ function RegisterUser() {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1100, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{
         background: 'linear-gradient(135deg, #3b0764 0%, #5b21b6 60%, #7c3aed 100%)',
@@ -60,35 +76,32 @@ function RegisterUser() {
         <Box sx={{ position: 'absolute', right: -30, bottom: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(249,115,22,0.25)', filter: 'blur(30px)' }} />
         <Typography variant="h5" color="#fff" fontWeight={800}>User Management</Typography>
         <Typography color="rgba(255,255,255,0.65)" mt={0.3} fontSize="0.9rem">
-          Create accounts directly for students and instructors
+          Register new students and instructors with detailed profiles
         </Typography>
       </Box>
 
       <Grid container spacing={3}>
-        {/* Form */}
-        <Grid item xs={12} md={5}>
-          <Paper sx={{ overflow: 'hidden' }}>
-            <Box sx={{
-              background: 'linear-gradient(135deg, #f5f0ff, #ede9fe)',
-              p: 2.5, borderBottom: '1px solid rgba(167,139,250,0.2)',
-              display: 'flex', alignItems: 'center', gap: 1.5,
-            }}>
-              <Box sx={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', borderRadius: 2, p: 1, display: 'flex' }}>
-                <PersonAddIcon sx={{ color: '#fff', fontSize: 20 }} />
-              </Box>
-              <Typography variant="h6" fontWeight={700}>Create Account</Typography>
-            </Box>
-            <Box sx={{ p: 3 }}>
-              {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
-              {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>}
-              <form onSubmit={handleSubmit}>
+        {/* Registration Form Sections */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="h6" fontWeight={700} mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonAddIcon color="primary" /> Registration Form
+          </Typography>
+          
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+
+          <form onSubmit={handleSubmit}>
+            {/* Section 1: Personal Details */}
+            <Accordion expanded={expanded === 'panel1'} onChange={handleAccordionChange('panel1')} sx={{ borderRadius: '12px !important', mb: 1, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <ContactPageIcon color="primary" fontSize="small" />
+                  <Typography fontWeight={700}>Personal Details</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}><TextField fullWidth label="First Name" value={form.first_name} onChange={set('first_name')} required size="small" /></Grid>
-                  <Grid item xs={6}><TextField fullWidth label="Last Name" value={form.last_name} onChange={set('last_name')} size="small" /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Username" value={form.username} onChange={set('username')} required size="small" /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Email" type="email" value={form.email} onChange={set('email')} required size="small" /></Grid>
-                  <Grid item xs={6}><TextField fullWidth label="Phone" value={form.phone} onChange={set('phone')} size="small" /></Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={12}>
                     <FormControl fullWidth size="small">
                       <InputLabel>Role</InputLabel>
                       <Select value={form.role} label="Role" onChange={set('role')}>
@@ -97,17 +110,48 @@ function RegisterUser() {
                       </Select>
                     </FormControl>
                   </Grid>
-
+                  <Grid item xs={6}><TextField fullWidth label="First Name" value={form.first_name} onChange={set('first_name')} required size="small" /></Grid>
+                  <Grid item xs={6}><TextField fullWidth label="Last Name" value={form.last_name} onChange={set('last_name')} size="small" /></Grid>
+                  <Grid item xs={6}><TextField fullWidth label={form.role === 'student' ? "Candidate Mobile" : "Phone"} value={form.phone} onChange={set('phone')} required size="small" /></Grid>
+                  <Grid item xs={6}><TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth} onChange={set('date_of_birth')} size="small" InputLabelProps={{ shrink: true }} /></Grid>
                   <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Highest Qualification" value={form.qualification} onChange={set('qualification')} size="small" /></Grid>
-
+                  
                   {form.role === 'student' && (
                     <>
-                      <Grid item xs={6}><TextField fullWidth label="Parent Details" value={form.parent_details} onChange={set('parent_details')} size="small" /></Grid>
+                      <Grid item xs={12}><Divider sx={{ my: 1 }}><Typography variant="caption" fontWeight={700} color="text.secondary">PARENT / GUARDIAN DETAILS</Typography></Divider></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Parent Name" value={form.parent_name} onChange={set('parent_name')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Parent Mobile" value={form.parent_phone} onChange={set('parent_phone')} size="small" /></Grid>
                       <Grid item xs={6}><TextField fullWidth label="Age" type="number" value={form.age} onChange={set('age')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="10th %" type="number" value={form.tenth_percentage} onChange={set('tenth_percentage')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Inter %" type="number" value={form.intermediate_percentage} onChange={set('intermediate_percentage')} size="small" /></Grid>
-                      <Grid item xs={6}>
+                    </>
+                  )}
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* Section 2: Qualification Details */}
+            <Accordion expanded={expanded === 'panel2'} onChange={handleAccordionChange('panel2')} sx={{ borderRadius: '12px !important', mb: 1, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <SchoolIcon color="primary" fontSize="small" />
+                  <Typography fontWeight={700}>Qualification Section</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}><TextField fullWidth label="Highest Qualification" value={form.qualification} onChange={set('qualification')} size="small" placeholder="e.g. B.Tech in CSE" /></Grid>
+                  
+                  {form.role === 'student' && (
+                    <>
+                      <Grid item xs={12}><Typography variant="caption" fontWeight={700} color="text.secondary">10TH CLASS</Typography></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Year of Study" type="number" value={form.tenth_year} onChange={set('tenth_year')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Percentage Obtained" type="number" value={form.tenth_percentage} onChange={set('tenth_percentage')} size="small" /></Grid>
+                      
+                      <Grid item xs={12}><Typography variant="caption" fontWeight={700} color="text.secondary">INTERMEDIATE</Typography></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Year of Study" type="number" value={form.intermediate_year} onChange={set('intermediate_year')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Percentage Obtained" type="number" value={form.intermediate_percentage} onChange={set('intermediate_percentage')} size="small" /></Grid>
+                      
+                      <Grid item xs={12}><Typography variant="caption" fontWeight={700} color="text.secondary">DEGREE</Typography></Grid>
+                      <Grid item xs={12}>
                         <FormControl fullWidth size="small">
                           <InputLabel>Degree Type</InputLabel>
                           <Select value={form.degree_type} label="Degree Type" onChange={set('degree_type')}>
@@ -119,7 +163,8 @@ function RegisterUser() {
                           </Select>
                         </FormControl>
                       </Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Degree %" type="number" value={form.degree_percentage} onChange={set('degree_percentage')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Year of Study" type="number" value={form.degree_year} onChange={set('degree_year')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Percentage Obtained" type="number" value={form.degree_percentage} onChange={set('degree_percentage')} size="small" /></Grid>
                     </>
                   )}
 
@@ -130,52 +175,57 @@ function RegisterUser() {
                       <Grid item xs={12}><TextField fullWidth label="Work History" value={form.work_history} onChange={set('work_history')} size="small" multiline rows={2} placeholder="Previous company/college details" /></Grid>
                     </>
                   )}
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
 
+            {/* Section 3: Credentials */}
+            <Accordion expanded={expanded === 'panel3'} onChange={handleAccordionChange('panel3')} sx={{ borderRadius: '12px !important', mb: 3, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <VpnKeyIcon color="primary" fontSize="small" />
+                  <Typography fontWeight={700}>Credential Details</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}><TextField fullWidth label="Username" value={form.username} onChange={set('username')} required size="small" /></Grid>
+                  <Grid item xs={12}><TextField fullWidth label="Email" type="email" value={form.email} onChange={set('email')} required size="small" /></Grid>
                   <Grid item xs={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={set('password')} required size="small" /></Grid>
                   <Grid item xs={12}><TextField fullWidth label="Confirm Password" type="password" value={form.password2} onChange={set('password2')} required size="small" /></Grid>
                 </Grid>
-                <Button type="submit" variant="contained" fullWidth sx={{ mt: 3, py: 1.3 }} startIcon={<PersonAddIcon />}>
-                  Create Account
-                </Button>
-              </form>
-            </Box>
-          </Paper>
+              </AccordionDetails>
+            </Accordion>
+
+            <Button type="submit" variant="contained" fullWidth sx={{ py: 1.5, borderRadius: 3, fontWeight: 800, fontSize: '1rem', boxShadow: '0 8px 20px rgba(124,58,237,0.3)' }} startIcon={<PersonAddIcon />}>
+              Create {form.role.toUpperCase()} Account
+            </Button>
+          </form>
         </Grid>
 
-        {/* Table */}
-        <Grid item xs={12} md={7}>
-          <Paper sx={{ overflow: 'hidden' }}>
-            <Box sx={{
-              background: 'linear-gradient(135deg, #f5f0ff, #ede9fe)',
-              p: 2.5, borderBottom: '1px solid rgba(167,139,250,0.2)',
-              display: 'flex', alignItems: 'center', gap: 1.5,
-            }}>
-              <Box sx={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', borderRadius: 2, p: 1, display: 'flex' }}>
-                <PeopleIcon sx={{ color: '#fff', fontSize: 20 }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" fontWeight={700}>Registered Users</Typography>
-                <Typography variant="caption" color="text.secondary">{users.length} total</Typography>
-              </Box>
-            </Box>
-            <TableContainer sx={{ maxHeight: 500 }}>
+        {/* User List Table */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="h6" fontWeight={700} mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PeopleIcon color="secondary" /> Registered Users
+          </Typography>
+          <Paper sx={{ overflow: 'hidden', borderRadius: 4, boxShadow: '0 10px 30px rgba(0,0,0,0.04)' }}>
+            <TableContainer sx={{ maxHeight: 600 }}>
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>User</TableCell>
-                    <TableCell>Role</TableCell>
-                    <TableCell>Phone</TableCell>
-                    <TableCell>Joined</TableCell>
+                    <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>User</TableCell>
+                    <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Qualification</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {users.map(u => {
                     const rs = roleStyle[u.role] || roleStyle.student;
                     return (
-                      <TableRow key={u.id}>
+                      <TableRow key={u.id} hover>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Avatar sx={{ width: 32, height: 32, background: rs.grad, fontSize: 12, fontWeight: 800 }}>
+                            <Avatar sx={{ width: 36, height: 36, background: rs.grad, fontSize: 13, fontWeight: 800 }}>
                               {(u.first_name?.[0] || u.username?.[0] || '?').toUpperCase()}
                             </Avatar>
                             <Box>
@@ -185,20 +235,19 @@ function RegisterUser() {
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Chip label={u.role} size="small" sx={{ bgcolor: rs.bg, color: rs.color, fontWeight: 700, textTransform: 'capitalize' }} />
+                          <Chip label={u.role} size="small" sx={{ bgcolor: rs.bg, color: rs.color, fontWeight: 700, textTransform: 'capitalize', fontSize: '0.7rem' }} />
                         </TableCell>
-                        <TableCell><Typography variant="body2">{u.phone || '—'}</Typography></TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary">{new Date(u.created_at).toLocaleDateString()}</Typography>
+                          <Typography variant="caption" fontWeight={600}>{u.qualification || '—'}</Typography>
                         </TableCell>
                       </TableRow>
                     );
                   })}
                   {users.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
-                        <PeopleIcon sx={{ fontSize: 40, color: '#c4b5fd', display: 'block', mx: 'auto', mb: 1 }} />
-                        <Typography color="text.secondary">No users registered yet</Typography>
+                      <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                        <PeopleIcon sx={{ fontSize: 40, color: '#e2e8f0', mb: 1 }} />
+                        <Typography color="text.secondary">No users found</Typography>
                       </TableCell>
                     </TableRow>
                   )}
