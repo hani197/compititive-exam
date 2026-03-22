@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Grid, Card, CardContent, CardActions, Button,
   Chip, CircularProgress, Avatar, LinearProgress, Paper, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow
+  TableCell, TableContainer, TableHead, TableRow, Alert
 } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -44,18 +44,21 @@ function Dashboard() {
   const isAdmin = user?.role === 'admin' || user?.is_staff;
 
   useEffect(() => {
-    const endpoints = isAdmin 
-      ? [api.get('/results/dashboard/'), api.get('/papers/old-papers/')] 
-      : [api.get('/papers/assignments/'), api.get('/results/dashboard/'), api.get('/sessions/'), api.get('/papers/old-papers/')];
+    const fetchData = async () => {
+      try {
+        const endpoints = isAdmin 
+          ? [api.get('/results/dashboard/'), api.get('/papers/old-papers/')] 
+          : [api.get('/papers/assignments/'), api.get('/results/dashboard/'), api.get('/sessions/'), api.get('/papers/old-papers/')];
 
-    Promise.all(endpoints)
-      .then(res => {
+        const res = await Promise.all(endpoints);
+        
         if (isAdmin) {
-          setData(prev => ({ 
-            ...prev, 
+          setData({ 
+            assignments: [],
             stats: res[0].data || null, 
+            sessions: [],
             oldPapers: res[1].data?.results || res[1].data || [] 
-          }));
+          });
         } else {
           setData({
             assignments: res[0].data?.results || res[0].data || [],
@@ -64,12 +67,15 @@ function Dashboard() {
             oldPapers: res[3].data?.results || res[3].data || [],
           });
         }
-      })
-      .catch(err => {
-        console.error("Dashboard data fetch error:", err);
-        setError("Failed to load dashboard data. Please try again later.");
-      })
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+        setError("Failed to load dashboard. Please refresh.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [isAdmin]);
 
   if (loading) return (
@@ -80,8 +86,8 @@ function Dashboard() {
 
   if (error) return (
     <Box sx={{ p: 3, maxWidth: 600, mx: 'auto', mt: 10 }}>
-      <Alert severity="error" variant="filled">{error}</Alert>
-      <Button fullWidth variant="outlined" sx={{ mt: 2 }} onClick={() => window.location.reload()}>Retry</Button>
+      <Alert severity="error">{error}</Alert>
+      <Button fullWidth sx={{ mt: 2 }} onClick={() => window.location.reload()}>Retry</Button>
     </Box>
   );
 
@@ -89,7 +95,6 @@ function Dashboard() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const statsList = isAdmin ? ADMIN_STATS : STUDENT_STATS;
 
-  // Safe pending count calculation
   const pendingCount = isAdmin ? 0 : (data.assignments || []).filter(a => 
     !(data.sessions || []).find(s => (s.paper === a.paper_detail?.id || s.paper_detail?.id === a.paper_detail?.id) && s.status !== 'in_progress')
   ).length;
@@ -223,7 +228,6 @@ function AdminDashboardView({ stats, navigate }) {
           </CardContent>
         </Card>
 
-        {/* Old Papers List for Admin */}
         <Paper sx={{ p: 0, borderRadius: 3, overflow: 'hidden' }}>
           <Box sx={{ p: 2.5, borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" fontWeight={800}>Old Papers</Typography>
@@ -244,7 +248,7 @@ function AdminDashboardView({ stats, navigate }) {
                   </TableRow>
                 ))}
                 {(!stats?.old_papers || stats.old_papers.length === 0) && (
-                  <TableRow><TableCell colSpan={2} align="center" sx={{ py: 4 }}><Typography variant="caption" color="text.secondary">No papers uploaded</Typography></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={2} align="center" sx={{ py: 4 }}><Typography variant="caption" color="text.secondary">No papers</Typography></TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -361,25 +365,6 @@ function StudentDashboardView({ data, navigate }) {
                     </Box>
                   </Box>
                   <Button size="small" variant="outlined" component="a" href={paper.file} target="_blank">View</Button>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-
-      {data.stats?.recent_results?.length > 0 && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" fontWeight={700} mb={2}>Performance History</Typography>
-          <Grid container spacing={2}>
-            {data.stats.recent_results.map(r => (
-              <Grid item xs={12} sm={6} key={r.id}>
-                <Paper sx={{ p: 2, borderRadius: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography fontWeight={700}>{r.exam_name}</Typography>
-                    <Typography variant="h6" color={r.percentage >= 60 ? 'success.main' : 'error.main'}>{r.percentage}%</Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={r.percentage} color={r.percentage >= 60 ? 'success' : 'error'} />
                 </Paper>
               </Grid>
             ))}
