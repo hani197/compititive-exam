@@ -74,3 +74,19 @@ class AssignedPaper(models.Model):
 
     def __str__(self):
         return f"Assignment: {self.paper.title}"
+
+
+class PreviousYearPaper(models.Model):
+    exam_type = models.ForeignKey(ExamType, on_delete=models.CASCADE, related_name='old_papers')
+    title = models.CharField(max_length=255)
+    year = models.PositiveIntegerField()
+    file = models.FileField(upload_to='old_papers/')
+    description = models.TextField(blank=True)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='uploaded_old_papers'
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.exam_type.code} - {self.year} - {self.title}"
+

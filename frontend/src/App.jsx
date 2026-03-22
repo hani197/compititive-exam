@@ -21,6 +21,7 @@ import SubmissionsPage from './pages/admin/Submissions';
 import RegisterUserPage from './pages/admin/RegisterUser';
 import CoachingCentresPage from './pages/admin/CoachingCentres';
 import AssignmentsPage from './pages/admin/Assignments';
+import OldPapersPage from './pages/admin/OldPapers';
 
 import { withAuth, withAdmin } from './components/withAuth';
 
@@ -37,6 +38,7 @@ const AdminSubmissions = withAdmin(SubmissionsPage);
 const AdminRegister = withAdmin(RegisterUserPage);
 const AdminCentres = withAdmin(CoachingCentresPage);
 const AdminAssignments = withAdmin(AssignmentsPage);
+const AdminOldPapers = withAdmin(OldPapersPage);
 
 function Layout() {
   return (
@@ -76,6 +78,7 @@ function App() {
               <Route path="admin/register" element={<AdminRegister />} />
               <Route path="admin/coaching-centres" element={<AdminCentres />} />
               <Route path="admin/assignments" element={<AdminAssignments />} />
+              <Route path="admin/old-papers" element={<AdminOldPapers />} />
             </Route>
 
             {/* Fallback */}

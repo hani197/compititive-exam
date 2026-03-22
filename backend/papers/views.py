@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from exams.models import ExamType, Subject, Chapter
 from users.models import User
 from users.views import IsAdmin
-from .models import GeneratedPaper, Question, AssignedPaper
-from .serializers import GeneratedPaperSerializer, GeneratePaperInputSerializer, AssignedPaperSerializer
+from .models import GeneratedPaper, Question, AssignedPaper, PreviousYearPaper
+from .serializers import (GeneratedPaperSerializer, GeneratePaperInputSerializer, 
+                        AssignedPaperSerializer, PreviousYearPaperSerializer)
 from ai_service.paper_generator import generate_exam_paper
 
 
@@ -98,3 +99,17 @@ class AssignedPaperViewSet(viewsets.ReadOnlyModelViewSet):
         if user.role == 'admin' or user.is_staff:
             return AssignedPaper.objects.all().order_by('-assigned_at')
         return AssignedPaper.objects.filter(students=user).order_by('-assigned_at')
+
+
+class PreviousYearPaperViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing Old/Previous Year Papers."""
+    serializer_class = PreviousYearPaperSerializer
+    queryset = PreviousYearPaper.objects.all().order_by('-year', '-uploaded_at')
+
+    def get_permissions(self):
+        if self.action in ['create', 'destroy', 'update', 'partial_update']:
+            return [IsAdmin()]
+        return [permissions.IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)

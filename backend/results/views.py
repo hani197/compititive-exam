@@ -54,13 +54,18 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
             if not user.is_superuser and user.coaching_centre:
                 recent_submissions = recent_submissions.filter(student__coaching_centre=user.coaching_centre)
             
+            from papers.models import PreviousYearPaper
+            from papers.serializers import PreviousYearPaperSerializer
+            old_papers = PreviousYearPaper.objects.all().order_by('-uploaded_at')[:5]
+
             return Response({
                 'is_admin': True,
                 'total_students': total_students,
                 'total_instructors': total_instructors,
                 'total_papers': total_papers,
                 'pending_confirmation': recent_submissions.filter(analysis_confirmed=False).count(),
-                'recent_results': ExamResultSerializer(recent_submissions.order_by('-evaluated_at')[:5], many=True).data
+                'recent_results': ExamResultSerializer(recent_submissions.order_by('-evaluated_at')[:5], many=True).data,
+                'old_papers': PreviousYearPaperSerializer(old_papers, many=True).data
             })
 
         results = ExamResult.objects.filter(student=user, analysis_confirmed=True)

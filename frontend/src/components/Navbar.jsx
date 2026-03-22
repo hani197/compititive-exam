@@ -26,6 +26,7 @@ export default function Navbar() {
     ? [
         { label: 'Users', icon: <PeopleIcon fontSize="small" />, path: '/admin/register' },
         { label: 'Assignments', icon: <AssignmentIcon fontSize="small" />, path: '/admin/assignments' },
+        { label: 'Old Papers', icon: <HistoryIcon fontSize="small" />, path: '/admin/old-papers' },
         { label: 'Generate Paper', icon: <AutoAwesomeIcon fontSize="small" />, path: '/admin/generate-paper' },
         { label: 'Submissions', icon: <FactCheckIcon fontSize="small" />, path: '/admin/submissions' },
       ]

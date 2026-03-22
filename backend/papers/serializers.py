@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import GeneratedPaper, Question, AssignedPaper
+from .models import GeneratedPaper, Question, AssignedPaper, PreviousYearPaper
 from users.serializers import UserSerializer
 
 
@@ -50,3 +50,13 @@ class AssignedPaperSerializer(serializers.ModelSerializer):
 
     def get_student_count(self, obj):
         return obj.students.count()
+
+
+class PreviousYearPaperSerializer(serializers.ModelSerializer):
+    exam_type_name = serializers.CharField(source='exam_type.name', read_only=True)
+    exam_type_code = serializers.CharField(source='exam_type.code', read_only=True)
+
+    class Meta:
+        model = PreviousYearPaper
+        fields = ['id', 'exam_type', 'exam_type_name', 'exam_type_code', 'title', 'year', 'file', 'description', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at']

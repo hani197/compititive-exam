@@ -12,6 +12,8 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import TimerIcon from '@mui/icons-material/Timer';
+import HistoryIcon from '@mui/icons-material/History';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
@@ -36,23 +38,24 @@ const ADMIN_STATS = [
 function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState({ assignments: [], stats: null, sessions: [] });
+  const [data, setData] = useState({ assignments: [], stats: null, sessions: [], oldPapers: [] });
   const [loading, setLoading] = useState(true);
   const isAdmin = user?.role === 'admin' || user?.is_staff;
 
   useEffect(() => {
     const endpoints = isAdmin 
-      ? [api.get('/results/dashboard/')] 
-      : [api.get('/papers/assignments/'), api.get('/results/dashboard/'), api.get('/sessions/')];
+      ? [api.get('/results/dashboard/'), api.get('/papers/old-papers/')] 
+      : [api.get('/papers/assignments/'), api.get('/results/dashboard/'), api.get('/sessions/'), api.get('/papers/old-papers/')];
 
     Promise.all(endpoints).then(res => {
       if (isAdmin) {
-        setData(prev => ({ ...prev, stats: res[0].data }));
+        setData(prev => ({ ...prev, stats: res[0].data, oldPapers: res[1].data.results || res[1].data }));
       } else {
         setData({
           assignments: res[0].data.results || res[0].data,
           stats: res[1].data,
           sessions: res[2].data.results || res[2].data,
+          oldPapers: res[3].data.results || res[3].data,
         });
       }
     }).finally(() => setLoading(false));
@@ -188,11 +191,42 @@ function AdminDashboardView({ stats, navigate }) {
                 <Button fullWidth variant="outlined" startIcon={<AssignmentIcon />} onClick={() => navigate('/admin/assignments')}>Assign Mentors</Button>
               </Grid>
               <Grid item xs={12}>
+                <Button fullWidth variant="outlined" startIcon={<HistoryIcon />} onClick={() => navigate('/admin/old-papers')}>Old Papers</Button>
+              </Grid>
+              <Grid item xs={12}>
                 <Button fullWidth variant="outlined" startIcon={<FactCheckIcon />} onClick={() => navigate('/admin/submissions')}>Review Results</Button>
               </Grid>
             </Grid>
           </CardContent>
         </Card>
+
+        {/* Old Papers List for Admin */}
+        <Paper sx={{ p: 0, borderRadius: 3, overflow: 'hidden' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" fontWeight={800}>Old Papers</Typography>
+            <Button size="small" onClick={() => navigate('/admin/old-papers')}>Manage</Button>
+          </Box>
+          <TableContainer sx={{ maxHeight: 300 }}>
+            <Table size="small">
+              <TableBody>
+                {stats?.old_papers?.map(p => (
+                  <TableRow key={p.id} hover>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={600} sx={{ maxWidth: 180 }} noWrap>{p.title}</Typography>
+                      <Typography variant="caption" color="text.secondary">{p.exam_type_name} · {p.year}</Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" component="a" href={p.file} target="_blank"><PictureAsPdfIcon fontSize="small" color="error" /></IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!stats?.old_papers || stats.old_papers.length === 0) && (
+                  <TableRow><TableCell colSpan={2} align="center" sx={{ py: 4 }}><Typography variant="caption" color="text.secondary">No papers uploaded</Typography></TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       </Grid>
     </Grid>
   );
@@ -280,6 +314,34 @@ function StudentDashboardView({ data, navigate }) {
             })}
           </Grid>
         </>
+      )}
+
+      {data.oldPapers?.length > 0 && (
+        <Box sx={{ mt: 5, mb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+            <Box sx={{ background: 'linear-gradient(135deg, #1e293b, #334155)', borderRadius: 2, p: 0.8, display: 'flex' }}>
+              <HistoryIcon sx={{ color: '#fff', fontSize: 18 }} />
+            </Box>
+            <Typography variant="h6" fontWeight={700}>Previous Year Papers</Typography>
+          </Box>
+          <Grid container spacing={2}>
+            {data.oldPapers.map(paper => (
+              <Grid item xs={12} sm={6} md={4} key={paper.id}>
+                <Paper sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, border: '1px solid #e2e8f0', transition: 'all 0.2s', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderColor: '#7c3aed' } }}>
+                  <Avatar sx={{ bgcolor: '#fee2e2', color: '#dc2626' }}><PictureAsPdfIcon /></Avatar>
+                  <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                    <Typography variant="body2" fontWeight={700} noWrap>{paper.title}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                      <Chip label={paper.year} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }} />
+                      <Typography variant="caption" color="text.secondary" noWrap>{paper.exam_type_name}</Typography>
+                    </Box>
+                  </Box>
+                  <Button size="small" variant="outlined" component="a" href={paper.file} target="_blank">View</Button>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       )}
 
       {data.stats?.recent_results?.length > 0 && (
