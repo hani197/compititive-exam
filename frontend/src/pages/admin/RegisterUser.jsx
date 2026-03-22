@@ -139,10 +139,11 @@ function RegisterUser() {
                   <Grid item xs={6}><TextField fullWidth label="Last Name" value={form.last_name} onChange={set('last_name')} size="small" /></Grid>
                   <Grid item xs={6}><TextField fullWidth label={form.role === 'student' ? "Candidate Mobile" : "Phone"} value={form.phone} onChange={set('phone')} required size="small" /></Grid>
                   <Grid item xs={6}><TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth} onChange={set('date_of_birth')} size="small" InputLabelProps={{ shrink: true }} /></Grid>
+                  <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
                   {form.role === 'student' && (
                     <>
                       <Grid item xs={6}><TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated from DOB" /></Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={6}>
                         <FormControl fullWidth size="small">
                           <InputLabel>Joining for Exam Coaching</InputLabel>
                           <Select value={form.exam_type} label="Joining for Exam Coaching" onChange={set('exam_type')}>
@@ -152,7 +153,6 @@ function RegisterUser() {
                       </Grid>
                     </>
                   )}
-                  <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
                 </Grid>
               </AccordionDetails>
             </Accordion>
