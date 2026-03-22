@@ -136,19 +136,29 @@ function GeneratePaperPage() {
 
           <Grid container spacing={2} mb={2}>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Exam Type</InputLabel>
-                <Select value={form.exam_type_id} label="Exam Type"
-                  onChange={e => setForm({ ...form, exam_type_id: e.target.value })}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="exam-type-label">Exam Type</InputLabel>
+                <Select
+                  labelId="exam-type-label"
+                  fullWidth
+                  value={form.exam_type_id}
+                  label="Exam Type"
+                  onChange={e => setForm({ ...form, exam_type_id: e.target.value })}
+                >
                   {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth disabled={!form.exam_type_id}>
-                <InputLabel>Subject</InputLabel>
-                <Select value={form.subject_id} label="Subject"
-                  onChange={e => setForm({ ...form, subject_id: e.target.value })}>
+              <FormControl fullWidth size="small" disabled={!form.exam_type_id}>
+                <InputLabel id="subject-label">Subject</InputLabel>
+                <Select
+                  labelId="subject-label"
+                  fullWidth
+                  value={form.subject_id}
+                  label="Subject"
+                  onChange={e => setForm({ ...form, subject_id: e.target.value })}
+                >
                   {subjects.map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                 </Select>
               </FormControl>
