@@ -142,11 +142,17 @@ function RegisterUser() {
                   <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
                   {form.role === 'student' && (
                     <>
-                      <Grid item xs={6}><TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated from DOB" /></Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={12} sm={6}><TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated from DOB" /></Grid>
+                      <Grid item xs={12} sm={6}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>Joining for Exam Coaching</InputLabel>
-                          <Select fullWidth value={form.exam_type} label="Joining for Exam Coaching" onChange={set('exam_type')}>
+                          <InputLabel id="exam-type-label">Joining for Exam Coaching</InputLabel>
+                          <Select
+                            labelId="exam-type-label"
+                            fullWidth
+                            value={form.exam_type}
+                            label="Joining for Exam Coaching"
+                            onChange={set('exam_type')}
+                          >
                             {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                           </Select>
                         </FormControl>
