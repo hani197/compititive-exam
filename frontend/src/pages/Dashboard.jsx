@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Typography, Grid, Card, CardContent, CardActions, Button,
+  Box, Typography, Card, CardContent, CardActions, Button,
   Chip, CircularProgress, Avatar, LinearProgress, Paper, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Alert
+  TableCell, TableContainer, TableHead, TableRow, Alert, IconButton
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -121,9 +122,9 @@ function Dashboard() {
       </Box>
 
       {/* Stats Grid */}
-      <Grid container spacing={2.5} mb={5}>
+      <Grid container spacing={2.5} sx={{ mb: 5 }}>
         {statsList.map(card => (
-          <Grid item xs={12} sm={6} md={isAdmin ? 3 : 4} key={card.label}>
+          <Grid size={{ xs: 12, sm: 6, md: isAdmin ? 3 : 4 }} key={card.label}>
             <Card sx={{ background: card.gradient, boxShadow: `0 8px 32px ${card.shadow}`, border: 'none', borderRadius: 3 }}>
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2.5 }}>
                 <Box sx={{ bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 2.5, p: 1.2, display: 'flex', backdropFilter: 'blur(10px)' }}>
@@ -155,7 +156,7 @@ function Dashboard() {
 function AdminDashboardView({ stats, navigate }) {
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} md={8}>
+      <Grid size={{ xs: 12, md: 8 }}>
         <Paper sx={{ p: 0, borderRadius: 3, overflow: 'hidden' }}>
           <Box sx={{ p: 2.5, borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" fontWeight={800}>Recent Submissions</Typography>
@@ -204,27 +205,17 @@ function AdminDashboardView({ stats, navigate }) {
           </TableContainer>
         </Paper>
       </Grid>
-      <Grid item xs={12} md={4}>
+      <Grid size={{ xs: 12, md: 4 }}>
         <Card sx={{ borderRadius: 3, mb: 3 }}>
           <CardContent>
             <Typography variant="h6" fontWeight={800} mb={2}>Quick Actions</Typography>
-            <Grid container spacing={1.5}>
-              <Grid item xs={12}>
-                <Button fullWidth variant="outlined" startIcon={<AutoAwesomeIcon />} onClick={() => navigate('/admin/generate-paper')}>Generate Paper</Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button fullWidth variant="outlined" startIcon={<PeopleIcon />} onClick={() => navigate('/admin/register')}>Add Students</Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button fullWidth variant="outlined" startIcon={<AssignmentIcon />} onClick={() => navigate('/admin/assignments')}>Assign Mentors</Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button fullWidth variant="outlined" startIcon={<HistoryIcon />} onClick={() => navigate('/admin/old-papers')}>Old Papers</Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button fullWidth variant="outlined" startIcon={<FactCheckIcon />} onClick={() => navigate('/admin/submissions')}>Review Results</Button>
-              </Grid>
-            </Grid>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Button fullWidth variant="outlined" startIcon={<AutoAwesomeIcon />} onClick={() => navigate('/admin/generate-paper')}>Generate Paper</Button>
+              <Button fullWidth variant="outlined" startIcon={<PeopleIcon />} onClick={() => navigate('/admin/register')}>Add Students</Button>
+              <Button fullWidth variant="outlined" startIcon={<AssignmentIcon />} onClick={() => navigate('/admin/assignments')}>Assign Mentors</Button>
+              <Button fullWidth variant="outlined" startIcon={<HistoryIcon />} onClick={() => navigate('/admin/old-papers')}>Old Papers</Button>
+              <Button fullWidth variant="outlined" startIcon={<FactCheckIcon />} onClick={() => navigate('/admin/submissions')}>Review Results</Button>
+            </Box>
           </CardContent>
         </Card>
 
@@ -284,13 +275,13 @@ function StudentDashboardView({ data, navigate }) {
             <Typography variant="h6" fontWeight={700}>Pending Exams</Typography>
             <Chip label={pending.length} size="small" sx={{ bgcolor: '#ede9fe', color: '#5b21b6', fontWeight: 700 }} />
           </Box>
-          <Grid container spacing={2.5} mb={4}>
+          <Grid container spacing={2.5} sx={{ mb: 4 }}>
             {pending.map(assignment => {
               const paper = assignment.paper_detail;
               if (!paper) return null;
               const session = getSession(paper.id);
               return (
-                <Grid item xs={12} sm={6} md={4} key={assignment.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={assignment.id}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <CardContent sx={{ flex: 1 }}>
                       <Typography variant="h6" fontWeight={700} mb={1}>{paper.title}</Typography>
@@ -321,13 +312,13 @@ function StudentDashboardView({ data, navigate }) {
             </Box>
             <Typography variant="h6" fontWeight={700}>Completed Exams</Typography>
           </Box>
-          <Grid container spacing={2.5} mb={4}>
+          <Grid container spacing={2.5} sx={{ mb: 4 }}>
             {done.map(assignment => {
               const paper = assignment.paper_detail;
               const session = getSession(paper.id);
               if (!session) return null;
               return (
-                <Grid item xs={12} sm={6} md={4} key={assignment.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={assignment.id}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <CardContent sx={{ flex: 1 }}>
                       <Typography variant="h6" fontWeight={700}>{paper?.title || 'Untitled Paper'}</Typography>
@@ -354,7 +345,7 @@ function StudentDashboardView({ data, navigate }) {
           </Box>
           <Grid container spacing={2}>
             {data.oldPapers.map(paper => (
-              <Grid item xs={12} sm={6} md={4} key={paper.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={paper.id}>
                 <Paper sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, border: '1px solid #e2e8f0', transition: 'all 0.2s', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderColor: '#7c3aed' } }}>
                   <Avatar sx={{ bgcolor: '#fee2e2', color: '#dc2626' }}><PictureAsPdfIcon /></Avatar>
                   <Box sx={{ flex: 1, overflow: 'hidden' }}>
