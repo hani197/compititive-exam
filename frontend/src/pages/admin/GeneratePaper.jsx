@@ -24,7 +24,7 @@ function GeneratePaperPage() {
   const [form, setForm] = useState({
     title: '', exam_type_id: '', subject_id: '',
     chapter_ids: [], difficulty: 'mixed',
-    total_questions: 30, duration_minutes: 60,
+    total_questions: 10, duration_minutes: 60,
     old_paper_ids: []
   });
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -52,7 +52,8 @@ function GeneratePaperPage() {
   useEffect(() => {
     if (!form.subject_id) return;
     api.get('/chapters/?subject=' + form.subject_id).then(r => {
-      setChapters(r.data.results || r.data);
+      const data = r.data.results || r.data;
+      setChapters(data);
       setForm(f => ({ ...f, chapter_ids: [] }));
     });
   }, [form.subject_id]);
@@ -94,11 +95,16 @@ function GeneratePaperPage() {
     finally { setAssigning(false); }
   };
 
+  const handleReset = () => {
+    setGeneratedPaper(null);
+    setSuccess('');
+    setError('');
+  };
+
   const activeStep = generatedPaper ? 1 : 0;
 
   return (
     <Box sx={{ p: 3, maxWidth: 960, mx: 'auto' }}>
-      {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700}>Generate & Assign AI Paper</Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>
@@ -107,118 +113,101 @@ function GeneratePaperPage() {
       </Box>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-        <Step completed={!!generatedPaper}>
-          <StepLabel>Configure & Generate</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Assign to Students</StepLabel>
-        </Step>
+        <Step completed={!!generatedPaper}><StepLabel>Configure & Generate</StepLabel></Step>
+        <Step><StepLabel>Assign to Students</StepLabel></Step>
       </Stepper>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>}
 
-      {/* Step 1 */}
       <Card sx={{ mb: 3, opacity: generatedPaper ? 0.7 : 1 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <CardContent sx={{ p: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 4 }}>
             <Box sx={{ bgcolor: '#ede9fe', borderRadius: 2, p: 1, display: 'flex' }}>
               <AutoAwesomeIcon sx={{ color: '#4f46e5', fontSize: 20 }} />
             </Box>
             <Typography variant="h6" fontWeight={700}>Step 1: Configure Paper</Typography>
           </Box>
 
-          <TextField
-            fullWidth label="Paper Title" value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-            placeholder="e.g. EAMCET Maths - Chapter Test" sx={{ mb: 2 }}
-          />
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 3 }}>
+            <TextField
+              fullWidth label="Paper Title" value={form.title}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+              placeholder="e.g. UPSC CSAT - Reasoning Test"
+            />
 
-          <Grid container spacing={2} mb={2}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="exam-type-label">Exam Type</InputLabel>
-                <Select
-                  labelId="exam-type-label"
-                  fullWidth
-                  value={form.exam_type_id}
-                  label="Exam Type"
-                  onChange={e => setForm({ ...form, exam_type_id: e.target.value })}
-                >
-                  {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small" disabled={!form.exam_type_id}>
-                <InputLabel id="subject-label">Subject</InputLabel>
-                <Select
-                  labelId="subject-label"
-                  fullWidth
-                  value={form.subject_id}
-                  label="Subject"
-                  onChange={e => setForm({ ...form, subject_id: e.target.value })}
-                >
-                  {subjects.map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+            <FormControl fullWidth>
+              <InputLabel id="exam-type-label">Exam Type</InputLabel>
+              <Select
+                labelId="exam-type-label"
+                value={form.exam_type_id}
+                label="Exam Type"
+                onChange={e => setForm({ ...form, exam_type_id: e.target.value })}
+              >
+                {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
+              </Select>
+            </FormControl>
 
-          {chapters.length > 0 && (
-            <Box mb={2}>
-              <Typography variant="subtitle2" fontWeight={600} mb={1} color="text.secondary">
-                Select Chapters:
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {chapters.map(c => (
-                  <Chip
-                    key={c.id}
-                    label={c.name}
-                    onClick={() => toggleChapter(c.id)}
-                    color={form.chapter_ids.includes(c.id) ? 'primary' : 'default'}
-                    variant={form.chapter_ids.includes(c.id) ? 'filled' : 'outlined'}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                ))}
+            <FormControl fullWidth disabled={!form.exam_type_id}>
+              <InputLabel id="subject-label">Subject</InputLabel>
+              <Select
+                labelId="subject-label"
+                value={form.subject_id}
+                label="Subject"
+                onChange={e => setForm({ ...form, subject_id: e.target.value })}
+              >
+                {subjects.map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            {form.subject_id && (
+              <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                <Typography variant="subtitle2" fontWeight={700} mb={1.5} color="text.secondary">
+                  Select Chapters:
+                </Typography>
+                {chapters.length > 0 ? (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {chapters.map(c => (
+                      <Chip
+                        key={c.id}
+                        label={c.name}
+                        onClick={() => toggleChapter(c.id)}
+                        color={form.chapter_ids.includes(c.id) ? 'primary' : 'default'}
+                        variant={form.chapter_ids.includes(c.id) ? 'filled' : 'outlined'}
+                        sx={{ cursor: 'pointer', fontWeight: 600 }}
+                      />
+                    ))}
+                  </Box>
+                ) : (
+                  <Alert severity="warning" variant="outlined">
+                    No chapters added for this subject yet. Please add chapters in the admin panel.
+                  </Alert>
+                )}
               </Box>
-            </Box>
-          )}
+            )}
 
-          <Grid container spacing={2} mb={3}>
-            <Grid item xs={12} sm={4}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
               <FormControl fullWidth>
                 <InputLabel>Difficulty</InputLabel>
-                <Select value={form.difficulty} label="Difficulty"
-                  onChange={e => setForm({ ...form, difficulty: e.target.value })}>
-                  {difficulties.map(d => (
-                    <MenuItem key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</MenuItem>
-                  ))}
+                <Select value={form.difficulty} label="Difficulty" onChange={e => setForm({ ...form, difficulty: e.target.value })}>
+                  {difficulties.map(d => <MenuItem key={d} value={d}>{d.toUpperCase()}</MenuItem>)}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={4}>
               <TextField
-                fullWidth label="Number of Questions" type="number"
+                fullWidth label="No. of Questions" type="number"
                 value={form.total_questions}
                 onChange={e => setForm({ ...form, total_questions: +e.target.value })}
-                inputProps={{ min: 5, max: 100 }}
                 InputProps={{ startAdornment: <QuizIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 20 }} /> }}
               />
-            </Grid>
-            <Grid item xs={12} sm={4}>
               <TextField
-                fullWidth label="Duration (minutes)" type="number"
+                fullWidth label="Duration (min)" type="number"
                 value={form.duration_minutes}
                 onChange={e => setForm({ ...form, duration_minutes: +e.target.value })}
-                inputProps={{ min: 10, max: 300 }}
                 InputProps={{ startAdornment: <TimerIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 20 }} /> }}
               />
-            </Grid>
-          </Grid>
+            </Box>
 
-          <Box sx={{ mb: 3 }}>
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth>
               <InputLabel id="old-papers-label">Optional: Pick Questions from Old Papers</InputLabel>
               <Select
                 labelId="old-papers-label"
@@ -235,22 +224,17 @@ function GeneratePaperPage() {
                 )}
               >
                 {oldPapers.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.title} ({p.year})
-                  </MenuItem>
+                  <MenuItem key={p.id} value={p.id}>{p.title} ({p.year})</MenuItem>
                 ))}
               </Select>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                If selected, AI will prioritize picking or adapting questions from these papers.
-              </Typography>
             </FormControl>
           </Box>
 
           <Button
-            variant="contained" size="large"
+            variant="contained" size="large" fullWidth
             onClick={handleGenerate} disabled={loading || !!generatedPaper}
             startIcon={loading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <AutoAwesomeIcon />}
-            sx={{ px: 4 }}
+            sx={{ mt: 4, py: 1.5, fontWeight: 800, borderRadius: 2 }}
           >
             {loading ? 'Generating with AI...' : generatedPaper ? 'Paper Generated ✓' : 'Generate Paper'}
           </Button>
@@ -259,59 +243,49 @@ function GeneratePaperPage() {
 
       {/* Step 2 */}
       {generatedPaper && (
-        <Card>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+        <Card sx={{ mt: 3 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
               <Box sx={{ bgcolor: '#d1fae5', borderRadius: 2, p: 1, display: 'flex' }}>
                 <SendIcon sx={{ color: '#10b981', fontSize: 20 }} />
               </Box>
               <Typography variant="h6" fontWeight={700}>Step 2: Assign to Students</Typography>
             </Box>
 
-            <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 3 }}>
-              <strong>"{generatedPaper.title}"</strong> generated with {generatedPaper.questions?.length} questions.
+            <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 4 }}>
+              <strong>"{generatedPaper.title}"</strong> is ready! Select students to assign it.
             </Alert>
 
-            <Typography variant="subtitle2" fontWeight={600} color="text.secondary" mb={1.5}>
-              Select Students / Instructors:
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-              {students.filter(s => s.role !== 'admin').map(s => {
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+              <Button size="small" variant="outlined" onClick={handleReset}>
+                Edit Config / Start Over
+              </Button>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 4 }}>
+              {students.filter(s => s.role === 'student').map(s => {
                 const selected = selectedStudents.find(x => x.id === s.id);
                 return (
                   <Chip
                     key={s.id}
-                    avatar={
-                      <Avatar sx={{ bgcolor: selected ? '#fff' : '#ede9fe', color: selected ? '#4f46e5' : '#4f46e5', fontSize: 11, fontWeight: 700 }}>
-                        {(s.first_name?.[0] || s.username?.[0] || '?').toUpperCase()}
-                      </Avatar>
-                    }
+                    avatar={<Avatar sx={{ bgcolor: selected ? '#fff' : '#ede9fe', color: '#4f46e5', fontSize: 11 }}>{(s.first_name?.[0] || s.username?.[0] || '?').toUpperCase()}</Avatar>}
                     label={`${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username}
                     onClick={() => toggleStudent(s)}
                     color={selected ? 'primary' : 'default'}
                     variant={selected ? 'filled' : 'outlined'}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: 'pointer', p: 1 }}
                   />
                 );
               })}
-              {students.length === 0 && (
-                <Typography color="text.secondary" variant="body2">No users registered yet.</Typography>
-              )}
             </Box>
 
-            {selectedStudents.length > 0 && (
-              <Alert severity="info" sx={{ mb: 2 }}>
-                {selectedStudents.length} selected: {selectedStudents.map(s => s.first_name || s.username).join(', ')}
-              </Alert>
-            )}
-
             <Button
-              variant="contained" color="success" size="large"
+              variant="contained" color="success" size="large" fullWidth
               onClick={handleAssign} disabled={assigning || selectedStudents.length === 0}
               startIcon={assigning ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <SendIcon />}
-              sx={{ px: 4 }}
+              sx={{ py: 1.5, fontWeight: 800 }}
             >
-              {assigning ? 'Assigning...' : 'Assign Paper'}
+              {assigning ? 'Assigning...' : `Assign to ${selectedStudents.length} Student(s)`}
             </Button>
           </CardContent>
         </Card>

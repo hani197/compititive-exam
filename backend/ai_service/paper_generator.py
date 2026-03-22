@@ -3,145 +3,109 @@ import google.generativeai as genai
 from django.conf import settings
 from PyPDF2 import PdfReader
 import io
+import re
+import os
 
 # Configure Gemini
 genai.configure(api_key=settings.GEMINI_API_KEY)
-# Using gemma-3-4b-it as verified to work on free tier
 model = genai.GenerativeModel('gemma-3-4b-it')
 
+def clean_json_string(text):
+    """Deep clean JSON string for common LLM errors."""
+    # 1. Remove markdown formatting
+    text = re.sub(r'```(?:json)?\s*', '', text)
+    text = re.sub(r'\s*```', '', text)
+    
+    # 2. Extract content between first { and last }
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1:
+        text = text[start:end+1]
+    
+    # 3. Fix unescaped newlines within JSON strings (common in gemma)
+    # This regex looks for newlines that are NOT preceded by a comma or bracket (simplified)
+    # Actually, a better way is to replace newlines inside double quotes
+    def replace_newlines(match):
+        return match.group(0).replace('\n', '\\n')
+    text = re.sub(r'"[^"]*"', replace_newlines, text, flags=re.DOTALL)
+
+    # 4. Remove trailing commas
+    text = re.sub(r',\s*([\]}])', r'\1', text)
+    
+    return text.strip()
+
 def extract_text_from_pdf(file_path):
-    """Utility to extract text from a PDF file."""
     try:
         reader = PdfReader(file_path)
         text = ""
-        # Read up to 10 pages to avoid context window issues
-        for i in range(min(10, len(reader.pages))):
+        for i in range(min(5, len(reader.pages))):
             text += reader.pages[i].extract_text() + "\n"
         return text
     except Exception as e:
-        print(f"Error extracting PDF text: {e}")
+        print(f"Error extracting PDF: {e}")
         return ""
 
 def generate_exam_paper(exam_type: str, subject: str, chapters: list[str], 
                          total_questions: int = 10, difficulty: str = 'mixed',
                          reference_papers: list[str] = None) -> dict:
-    """
-    Generate exam questions using Gemini AI.
-    If reference_papers (list of text) is provided, pick/adapt questions from them.
-    """
     chapter_list = ", ".join(chapters)
     
-    source_instruction = ""
+    source_context = ""
     if reference_papers:
-        combined_ref = "\n---\n".join(reference_papers)
-        source_instruction = f"""
-I am providing some PREVIOUS YEAR PAPERS as reference below. 
-Please PICK or CLOSELY ADAPT {total_questions} questions from these reference texts that match the chapters: {chapter_list}.
+        # Heavily truncate reference to keep Gemini focused
+        combined_ref = "\n".join([p[:1500] for p in reference_papers])
+        source_context = f"ACT AS A QUESTION EXTRACTOR. USE THIS TEXT:\n{combined_ref}\n\n"
 
-REFERENCE PAPERS CONTENT:
-{combined_ref}
----
-"""
-
-    prompt = f"""{source_instruction}
-Generate {total_questions} exam questions for the following:
-
-Exam: {exam_type}
-Subject: {subject}
-Chapters: {chapter_list}
+    prompt = f"""{source_context}
+Task: Generate {total_questions} MCQ questions for Indian exam '{exam_type}', Subject: '{subject}', Chapters: {chapter_list}.
 Difficulty: {difficulty}
 
-Generate a mix of MCQ questions. For each question return JSON with this exact format:
+Strict JSON output format:
 {{
   "questions": [
     {{
       "question_number": 1,
-      "question_type": "mcq",
-      "question_text": "...",
-      "option_a": "...",
-      "option_b": "...",
-      "option_c": "...",
-      "option_d": "...",
+      "question_text": "text",
+      "option_a": "a", "option_b": "b", "option_c": "c", "option_d": "d",
       "correct_answer": "A",
-      "explanation": "...",
-      "chapter": "chapter name from the list",
-      "marks": 1.0,
-      "negative_marks": 0.25
+      "explanation": "why",
+      "chapter": "chapter name",
+      "marks": 1.0
     }}
   ]
 }}
 
-Make questions relevant to {exam_type} exam pattern in India.
-Return ONLY valid JSON, no extra text."""
-
-    response = model.generate_content(prompt)
-    response_text = response.text.strip()
-    
-    # Extract JSON if wrapped in markdown
-    if "```json" in response_text:
-        response_text = response_text.split("```json")[1].split("```")[0].strip()
-    elif "```" in response_text:
-        response_text = response_text.split("```")[1].split("```")[0].strip()
+CRITICAL:
+- Return ONLY JSON.
+- No markdown, no preamble.
+- Ensure all quotes are escaped.
+- Each question must be valid JSON."""
 
     try:
-        return json.loads(response_text)
-    except json.JSONDecodeError:
-        print(f"Failed to decode JSON. Raw response: {response_text}")
+        response = model.generate_content(prompt)
+        raw = response.text
+        
+        # LOG FOR DEBUGGING
+        log_path = os.path.join(settings.BASE_DIR, "ai_debug.log")
+        with open(log_path, "w") as f:
+            f.write(raw)
+            
+        cleaned = clean_json_string(raw)
+        return json.loads(cleaned)
+    except Exception as e:
+        print(f"DEBUG: Raw response was saved to {log_path}")
+        # If it failed, try one more time with a much simpler request
+        if "total_questions" in locals() and total_questions > 5:
+             return generate_exam_paper(exam_type, subject, chapters, 5, difficulty, reference_papers)
         raise
 
 def evaluate_descriptive_answer(question: str, correct_answer: str, student_answer: str, marks: float) -> dict:
-    """
-    Evaluate a descriptive answer using Gemini AI.
-    """
-    prompt = f"""Evaluate this student's answer for the exam question:
-
-Question: {question}
-Model Answer: {correct_answer}
-Student's Answer: {student_answer}
-Total Marks: {marks}
-
-Evaluate and return JSON:
-{{
-  "marks_obtained": <float between 0 and {marks}>,
-  "is_correct": <true if >= 60% marks>,
-  "feedback": "detailed feedback on the answer",
-  "key_points_covered": ["list of key points the student mentioned"],
-  "missing_points": ["important points the student missed"]
-}}
-
-Return ONLY valid JSON."""
-
+    prompt = f"Evaluate. JSON only. Q: {question} | A: {correct_answer} | Student: {student_answer} | Marks: {marks}"
     response = model.generate_content(prompt)
-    response_text = response.text.strip()
-    
-    if "```json" in response_text:
-        response_text = response_text.split("```json")[1].split("```")[0].strip()
-    elif "```" in response_text:
-        response_text = response_text.split("```")[1].split("```")[0].strip()
-
-    return json.loads(response_text)
+    return json.loads(clean_json_string(response.text))
 
 def generate_performance_analysis(student_name: str, exam_type: str, subject: str,
                                    chapter_analysis: dict, percentage: float) -> str:
-    """
-    Generate AI-based performance analysis and recommendations.
-    """
-    prompt = f"""Analyze this student's exam performance and provide recommendations:
-
-Student: {student_name}
-Exam: {exam_type}
-Subject: {subject}
-Score: {percentage:.1f}%
-Chapter-wise performance: {json.dumps(chapter_analysis, indent=2)}
-
-Provide:
-1. Overall performance summary (2-3 sentences)
-2. Strong areas
-3. Weak areas that need improvement
-4. Specific study recommendations
-5. Tips for the next attempt
-
-Keep it encouraging, specific, and actionable. Response in plain text (no JSON)."""
-
+    prompt = f"Analyze performance. Student: {student_name} | Score: {percentage}% | Data: {json.dumps(chapter_analysis)}"
     response = model.generate_content(prompt)
     return response.text.strip()
