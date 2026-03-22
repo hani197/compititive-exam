@@ -20,10 +20,12 @@ function GeneratePaperPage() {
   const [subjects, setSubjects] = useState([]);
   const [chapters, setChapters] = useState([]);
   const [students, setStudents] = useState([]);
+  const [oldPapers, setOldPapers] = useState([]);
   const [form, setForm] = useState({
     title: '', exam_type_id: '', subject_id: '',
     chapter_ids: [], difficulty: 'mixed',
-    total_questions: 30, duration_minutes: 60
+    total_questions: 30, duration_minutes: 60,
+    old_paper_ids: []
   });
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [generatedPaper, setGeneratedPaper] = useState(null);
@@ -35,6 +37,7 @@ function GeneratePaperPage() {
   useEffect(() => {
     api.get('/exam-types/').then(r => setExamTypes(r.data.results || r.data));
     api.get('/auth/students/').then(r => setStudents(r.data.results || r.data));
+    api.get('/papers/old-papers/').then(r => setOldPapers(r.data.results || r.data));
   }, []);
 
   useEffect(() => {
@@ -203,6 +206,35 @@ function GeneratePaperPage() {
               />
             </Grid>
           </Grid>
+
+          <Box sx={{ mb: 3 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="old-papers-label">Optional: Pick Questions from Old Papers</InputLabel>
+              <Select
+                labelId="old-papers-label"
+                multiple
+                value={form.old_paper_ids}
+                onChange={e => setForm({ ...form, old_paper_ids: e.target.value })}
+                label="Optional: Pick Questions from Old Papers"
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((id) => (
+                      <Chip key={id} label={oldPapers.find(p => p.id === id)?.title} size="small" />
+                    ))}
+                  </Box>
+                )}
+              >
+                {oldPapers.map((p) => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.title} ({p.year})
+                  </MenuItem>
+                ))}
+              </Select>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                If selected, AI will prioritize picking or adapting questions from these papers.
+              </Typography>
+            </FormControl>
+          </Box>
 
           <Button
             variant="contained" size="large"

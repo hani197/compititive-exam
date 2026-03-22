@@ -1,0 +1,362 @@
+﻿
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+  "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html lang="en" dir="ltr"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/terms/"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:og="http://ogp.me/ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:sioc="http://rdfs.org/sioc/ns#"
+  xmlns:sioct="http://rdfs.org/sioc/types#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head profile="http://www.w3.org/1999/xhtml/vocab">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | UPSC</title>
+  <link type="text/css" rel="stylesheet" href="https://upsc.gov.in/sites/default/files/css/css_lQaZfjVpwP_oGNqdtWCSpJT1EMqXdMiU84ekLLxQnc4.css" media="all" />
+<link type="text/css" rel="stylesheet" href="https://upsc.gov.in/sites/default/files/css/css_u9Cn6xFPfn6NvRqMGUV6k10stVTR4AGT7eontS75hX4.css" media="all" />
+<link type="text/css" rel="stylesheet" href="https://upsc.gov.in/sites/default/files/css/css_EFOS_8dhLIcrbjFFU1iZNZIbMUYgZ7zOwqQAQIupY5Q.css" media="all" />
+<link type="text/css" rel="stylesheet" href="https://upsc.gov.in/sites/default/files/css/css_YA53qp4D_4L0FO51OEO6R2rVdxY9ZLJH4iC5lKHxBuY.css" media="all" />
+  <!-- HTML5 element support for IE6-8 -->
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <script src="https://upsc.gov.in/sites/all/libraries/respondjs/respond.min.js?tc3as4"></script>
+<script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>window.jQuery || document.write("<script src='/sites/all/modules/contributed/jquery_update/replace/jquery/3.6/jquery.min.js'>\x3C/script>")</script>
+<script>jQuery.migrateMute=true;jQuery.migrateTrace=false;</script>
+<script src="//code.jquery.com/jquery-migrate-3.0.0.min.js"></script>
+<script>window.jQuery && window.jQuery.migrateWarnings || document.write("<script src='/sites/all/modules/contributed/jquery_update/replace/jquery-migrate/3/jquery-migrate.min.js'>\x3C/script>")</script>
+<script src="https://upsc.gov.in/sites/default/files/js/js_38VWQ3jjQx0wRFj7gkntZr077GgJoGn5nv3v05IeLLo.js"></script>
+<script>var base_url ="https://upsc.gov.in"; var themePath = "sites/all/themes/upsc"; var modulePath = "sites/all/modules/cmf/cmf_content";</script>
+<script src="https://upsc.gov.in/sites/default/files/js/js_DmGaZw7NdHWxYPXNgnlJD-o1sgTmN8Q6kU6Bg5DJmv8.js"></script>
+<script>      // close script tag for SecKit protection
+      //--><!]]>
+      </script>
+      <script type="text/javascript" src="/sites/all/modules/contributed/seckit/js/seckit.document_write.js"></script>
+      <link type="text/css" rel="stylesheet" id="seckit-clickjacking-no-body" media="all" href="/sites/all/modules/contributed/seckit/css/seckit.no_body.css" />
+      <!-- stop SecKit protection -->
+      <noscript>
+      <link type="text/css" rel="stylesheet" id="seckit-clickjacking-noscript-tag" media="all" href="/sites/all/modules/contributed/seckit/css/seckit.noscript_tag.css" />
+      <div id="seckit-noscript-tag">
+        <h1>Sorry, you need to enable JavaScript to visit this website.</h1>
+      </div>
+      </noscript>
+      <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+      // open script tag to avoid syntax errors</script>
+<script src="https://upsc.gov.in/sites/default/files/js/js_wCYUZ7MVXp50ty1cS_Uxtzduxh125GGyy7HqmR0_M_w.js"></script>
+<script src="https://upsc.gov.in/sites/default/files/js/js_sjhG1wyzXgZoLTEZYDCghljvvnNYlT1XGY_gLFFWENc.js"></script>
+<script>jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"upsc","theme_token":"GJ-KkpY4UXqaq8JUkm3LZluQw0GVOG_t7votQ3c9Dd8","js":{"sites\/all\/themes\/bootstrap\/js\/bootstrap.js":1,"sites\/all\/libraries\/respondjs\/respond.min.js":1,"\/\/code.jquery.com\/jquery-3.6.0.min.js":1,"0":1,"1":1,"\/\/code.jquery.com\/jquery-migrate-3.0.0.min.js":1,"2":1,"misc\/jquery-extend-3.4.0.js":1,"misc\/jquery-html-prefilter-3.5.0-backport.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"3":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/js\/font-size.js":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/js\/framework.js":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/js\/swithcer.js":1,"4":1,"sites\/all\/modules\/contributed\/views_bootstrap\/js\/views-bootstrap-carousel.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/affix.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/alert.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/button.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/carousel.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/collapse.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/dropdown.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/modal.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/tooltip.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/popover.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/scrollspy.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/tab.js":1,"sites\/all\/themes\/upsc\/bootstrap\/js\/transition.js":1,"sites\/all\/themes\/upsc\/js\/custom.js":1,"sites\/all\/themes\/upsc\/js\/ux4g-persist.js":1},"css":{"modules\/system\/system.base.css":1,"sites\/all\/modules\/contributed\/date\/date_api\/date.css":1,"sites\/all\/modules\/contributed\/date\/date_popup\/themes\/datepicker.1.7.css":1,"modules\/field\/theme\/field.css":1,"sites\/all\/modules\/contributed\/views\/css\/views.css":1,"sites\/all\/modules\/contributed\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/css\/base.css":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/css\/font.css":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/css\/flexslider.css":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/css\/base-responsive.css":1,"sites\/all\/modules\/cmf\/cmf_content\/assets\/css\/font-awesome.min.css":1,"sites\/all\/modules\/contributed\/ctools\/css\/ctools.css":1,"sites\/all\/themes\/upsc\/css\/style.css":1}},"urlIsAjaxTrusted":{"\/sites\/default\/files\/QP-CS-Prelim-24-GS-II-170624.pdf":true},"viewsBootstrap":{"carousel":{"1":{"id":1,"name":"main_slider","attributes":{"interval":5000,"pause":"hover"}}}},"bootstrap":{"anchorsFix":1,"anchorsSmoothScrolling":1,"popoverEnabled":0,"popoverOptions":{"animation":1,"html":0,"placement":"right","selector":"","trigger":"click","title":"","content":"","delay":0,"container":"body"},"tooltipEnabled":0,"tooltipOptions":{"animation":1,"html":0,"placement":"auto left","selector":"","trigger":"hover focus","delay":0,"container":"body"}}});</script>
+</head>
+<body class="html not-front not-logged-in no-sidebars page-node page-node- page-node-3910 node-type-page i18n-en" >
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible element-focusable">Skip to main content</a>
+  </div>
+    
+
+<header>
+        <div class="header-fixed clearfix">
+        <div class="region region-top-header">
+    <section id="block-cmf-content-header-region-block" class="block block-cmf-content clearfix">
+
+      
+  <noscript class="no_scr">"JavaScript is a standard programming language that is included to provide interactive features, Kindly enable Javascript in your browser. For details visit help page"
+     </noscript><div class="wrapper common-wrapper">
+  <div class="container common-container">
+      <div class="common-left clearfix">
+          <ul>
+              <li class="Gov-India"></li><li class="ministry"> <li class=""></li> <li class="ico-sitemap"><a href="https://upsc.gov.in/site-map" title="Sitemap">SiteMap</a></li> <li class="">|</li><li class="ico-skip"><a href="#skipCont" title="Skip to main content">Skip to main content</a></li></li></ul></div><div class="top-search"><ul><li><form class="form-search content-search" action="/sites/default/files/QP-CS-Prelim-24-GS-II-170624.pdf" method="post" id="search-block-form" accept-charset="UTF-8"><div><div>
+      <h2 class="element-invisible">Search form</h2>
+    <div class="input-group"><input title="Enter the terms you wish to search for." placeholder="Search" class="form-control form-text" type="text" id="edit-search-block-form--2" name="search_block_form" value="" size="15" maxlength="128" /><span class="input-group-btn"><button type="submit" class="btn btn-default">Search</button></span></div><button class="element-invisible btn btn-primary form-submit" id="edit-submit" name="op" value="Search" type="submit">Search</button>
+<input type="hidden" name="form_build_id" value="form-pjBO_-5ymdsjytjNNgf_HymqKimwgW5fbH8rTLrp8kc" />
+<input type="hidden" name="form_id" value="search_block_form" />
+</div>
+</div></form></li></ul>
+           
+        </div>
+        <div class="common-right clearfix">
+          <ul id="header-nav">
+                            
+             						
+								
+									
+								
+
+
+
+
+                               <li> <a onclick="set_font_size('increase')" title="Increase font size" href="javascript:void(0);">A<sup>+</sup></a> </li>
+                        <li> <a onclick="set_font_size()" title="Reset font size" href="javascript:void(0);">A<sup>&nbsp;</sup></a> </li>
+                        <li> <a onclick="set_font_size('decrease')" title="Decrease font size" href="javascript:void(0);">A<sup>-</sup></a> </li>
+        <li> <a href="javascript:void(0);" class="high-contrast dark" title="High Contrast">A</a> </li>
+       <li> <a href="javascript:void(0);" class="high-contrast light" title="Normal Contrast" style="display: none;">A</a> </li>
+
+<li style="border:none"> <a  style="border:none; margin-top:-3px" target="_blank" title="Linked In" href="https://www.linkedin.com/company/official-union-public-service-commission"><img src="/sites/default/files/LinkedIn_new.png" style=" border-style:none" alt="Linked In Page" title="Linked In Page" ></a> </li>
+<li style="border:none;    margin-left: -10px;"> <a  style="border:none; margin-top:-3px" target="_blank" title="RSS Feed" href="/rss.php"><img src="/sites/default/files/rss.png" style=" border-style:none; width: 26px;" alt="RSS Feed" title="RSS Feed" ></a> </li>
+         
+                
+                  <li class="hindi"><a target="_blank" href="https://upsc.gov.in/hi/sites/default/files" class="alink">हिन्दी</a></li>
+                  	
+            </ul>
+        </div>
+    </div>
+</div>
+</section> <!-- /.block -->
+<section id="block-block-11" class="block block-block clearfix">
+
+      
+  <script src="https://cdn.ux4g.gov.in/tools/accessibility-widget.js"></script>
+</section> <!-- /.block -->
+  </div>
+    </div>
+  <section class="wrapper header-wrapper fontSize">
+  <div class="container header-container">
+  <div class="row">
+  <div class="col-md-8 col-sm-8">
+      <h1 class="logo"><a href="#"><strong>संघ  लोक  सेवा  आयोग</strong> <span>UNION PUBLIC SERVICE COMMISSION</span></a></h1>        
+    </div>
+    
+        <div class="col-md-4 col-sm-4 col-xs-4">
+            
+    <div class="akam">
+            <a><img alt="AKAM"  src="/sites/all/themes/upsc/images/akam-logo.png" class="img-responsive"></a>
+</div>
+<div class="digital">
+<a><img alt="digital india"  src="/sites/all/themes/upsc/images/logo.png" class="img-responsive"></a>
+      </div>   </div>
+</div>
+
+</div>
+</section>
+    
+<section id="menu" class="fontSize">
+    <div class="container">
+<nav class="navbar navbar-default">
+<div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    
+    </div>
+       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <div id="main-menu">
+                    <ul class="menu nav"><li class="first leaf"><a href="/" title="">Home</a></li>
+<li class="expanded dropdown"><a href="/" title="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">About Us <span class="caret"></span></a><ul class="dropdown-menu"><li class="first leaf"><a href="/about-us/historical-perspective">Historical Perspective</a></li>
+<li class="collapsed"><a href="/about-us/constitutional-provisions">Constitutional Provisions</a></li>
+<li class="leaf"><a href="/about-us/commission-">The Commission</a></li>
+<li class="leaf"><a href="/about-us/functions">Functions</a></li>
+<li class="leaf"><a href="/about-us/secretariat">Secretariat</a></li>
+<li class="expanded"><a href="/about-us/divisions" title="">Divisions</a></li>
+<li class="leaf"><a href="/about-us/citizens-charter" title="">Citizen&#039;s Charter</a></li>
+<li class="leaf"><a href="/about-us/equal-opportunity-policy-pwd-employees-upsc" title="">EOP for PwD Employees of UPSC</a></li>
+<li class="leaf"><a href="/about-us/directory">Directory</a></li>
+<li class="leaf"><a href="/inauguration-museum">Museum</a></li>
+<li class="last leaf"><a href="HTTPS://upsc.gov.in/virtual_museum/" title="">Virtual Tour of Museum</a></li>
+</ul></li>
+<li class="expanded dropdown"><a href="/" title="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Examination <span class="caret"></span></a><ul class="dropdown-menu"><li class="first leaf"><a href="/examinations/exam-calendar" title="">Calendar</a></li>
+<li class="leaf"><a href="/examinations/active-exams" title="">Active Examinations</a></li>
+<li class="leaf"><a href="/examinations/forthcoming-exams" title="">Forthcoming Examinations</a></li>
+<li class="leaf"><a href="/examinations/previous-question-papers" title="">Previous Question Papers</a></li>
+<li class="leaf"><a href="/examinations/cutoff-marks--" title="">Cut-off Marks</a></li>
+<li class="leaf"><a href="/examinations/answer-key" title="">Answer Keys</a></li>
+<li class="leaf"><a href="https://upsconline.gov.in/marksheet/exam/marksheet_system/" title="">Marks Information</a></li>
+<li class="leaf"><a href="/examinations/marks-recommended-candidates" title="">Marks of Recommended Candidates</a></li>
+<li class="leaf"><a href="/examinations/marks-recommended-candidates-reserve-list" title="">Marks of Recommended Candidates (Reserve List)</a></li>
+<li class="leaf"><a href="https://upsconline.gov.in/miscellaneous/pdoiac/" title="UPSC PRATIBHA Setu (PRATIBHA stands for, Professional Resource And Talent Integration – Bridge for Hiring Aspirants), formerly known as Public Disclosure Scheme (PDS), a strategic initiative that allows verified employers—including ministries, PSUs, autonomous bodies, and private organizations—to access details of non-recommended willing candidates who cleared all stages of UPSC exams but did’t make it to the final merit list.">UPSC PRATIBHA Setu</a></li>
+<li class="leaf"><a href="/examination/model-question-and-answer-booklets" title="">Specimen Question Cum Answer Booklet (QCAB)</a></li>
+<li class="leaf"><a href="/examination/common-mistakes-committed-candidates-conventional-papers">Common mistakes committed by the candidates in Conventional Papers</a></li>
+<li class="leaf"><a href="/examinations/revised-syllabus-scheme" title="">Revised Syllabus and Scheme</a></li>
+<li class="leaf"><a href="/examination/time-frame-representation">Representation on Question Papers</a></li>
+<li class="last leaf"><a href="/examinations/demo-files-computer-based-combined-medical-service-examination">Demo Files</a></li>
+</ul></li>
+<li class="expanded dropdown"><a href="/" title="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Recruitment <span class="caret"></span></a><ul class="dropdown-menu"><li class="first leaf"><a href="/recruitment/recruitment-advertisement" title="">Advertisements</a></li>
+<li class="expanded"><a href="/recruitment/lateral-recruitments" title="">Status of Lateral Recruitment Cases (Advertisement-wise)</a></li>
+<li class="leaf"><a href="https://upsconline.nic.in/" title="">Online Recruitment Application (ORA)</a></li>
+<li class="expanded"><a href="/recruitment/status-recruitment-cases-advertisementwise">Status of Recruitment Cases (Advertisement-wise)</a></li>
+<li class="leaf"><a href="/recruitment/recruitment-performas" title="">Forms for Certificates</a></li>
+<li class="leaf"><a href="/recruitment/recruitment-test">Recruitment Tests</a></li>
+<li class="leaf"><a href="/recruitment/recruitment-requisition" title="">Recruitment Requisition</a></li>
+<li class="leaf"><a href="/recruitment/recruitment-cases-kept-hold-account-pending-litigations">Recruitment cases kept on hold on account of Pending Litigations</a></li>
+<li class="last leaf"><a href="/recruitment/time-frame-representation">Representation on Question Papers</a></li>
+</ul></li>
+<li class="expanded dropdown"><a href="/government-user" title="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Government Users <span class="caret"></span></a><ul class="dropdown-menu"><li class="first leaf"><a href="/government-user/central-government">Central Government</a></li>
+<li class="leaf"><a href="/government-user/state-ut-government">Union Territories Government</a></li>
+<li class="leaf"><a href="/government-user/state-government">State Government</a></li>
+<li class="last leaf"><a href="/government-user/others">Others</a></li>
+</ul></li>
+<li class="leaf"><a href="/forms-downloads" title="">Forms &amp; Downloads</a></li>
+<li class="leaf"><a href="/faqs" title="">FAQs</a></li>
+<li class="leaf"><a href="/right-to-information" title="">RTI</a></li>
+<li class="leaf"><a href="/helpline">Helpline - SC/ST/OBC/EWS/PwBD (1800-118-711)</a></li>
+<li class="last leaf"><a href="/" title="">HELPDESK : 011-24041001 / 011-40303444</a></li>
+</ul>                </div>
+                </div>
+              
+</nav>
+</div><!-- /.container-->
+
+
+  </section>
+    
+    
+    
+    
+    
+</header>
+<!----------------------------------------------------------------------------------my---------------------------------------------------------------------------->
+
+
+<!--*********Content wrapper start here *********************-->
+
+  
+  <div class="wrapper" id="skipCont"></div>
+   <section class="wrapper banner-wrapper fontSize">
+    
+  <div class="wrapper breadcrumb-wrapper">
+  	<div class="container breadcrumb-container">
+    	            <div id="breadcrumb" class="breadcrumb clearfix">  <div class="region region-navigation">
+    <section id="block-easy-breadcrumb-easy-breadcrumb" class="block block-easy-breadcrumb clearfix">
+
+      
+  <div class="easy-breadcrumb"><a href="/" class="easy-breadcrumb_segment easy-breadcrumb_segment-front">Home</a><span class="easy-breadcrumb_segment-separator"> >> </span><a href="/page-not-found" class="easy-breadcrumb_segment easy-breadcrumb_segment-title">Page Not Found</a></div>
+</section> <!-- /.block -->
+  </div>
+</div>
+              </div>
+  </div>
+   
+  </section>
+  
+  <section class="wrapper body-wrapper ">
+   
+        <div class="container body-container inner-body fontSize">
+        	
+          
+                	<div class="col-xs-12 col-sm-3 col-md-3 sidebar-container fontSize">
+                                     </div>
+				
+				
+				
+                <div class="col-xs-12 col-sm-9 col-md-9 content-container fontSize">			
+							
+				<div class="inner-right">                              
+                <a id="main-content"></a>
+                                      <h1 class="heading1">Page Not Found</h1>
+							
+                       
+										
+			            
+            					
+              <div class="region region-content">
+    <section id="block-views-basic-page-block" class="block block-views clearfix">
+
+      
+  <div class="view view-basic-page view-id-basic_page view-display-id-block view-dom-id-1298eaafc536d6ffb6ae498358da6eba">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first views-row-last">
+      
+  <div class="views-field views-field-body">        <div class="field-content"><p>This page could not be found.</p>
+</div>  </div>  
+  <div class="views-field views-field-field-upload">        <div class="field-content"></div>  </div>  
+  <div class="views-field views-field-php">        <span class="field-content"></ul></span>  </div>  
+  <div class="views-field views-field-field-link">        <div class="field-content"></div>  </div>  </div>
+    </div>
+  
+  
+  
+  
+  
+  
+</div>
+</section> <!-- /.block -->
+<div id="node-3910" class="node node-page clearfix" about="/page-not-found" typeof="foaf:Document">
+
+  
+      <span property="dc:title" content="Page Not Found" class="rdf-meta element-hidden"></span><span property="sioc:num_replies" content="0" datatype="xsd:integer" class="rdf-meta element-hidden"></span>
+  
+  <div class="content">
+      </div>
+
+  
+  
+</div>
+  </div>
+           
+          
+</div>            
+            	
+            
+            
+        </div>
+    </div>
+
+	
+</section>
+
+<!----------------------Content Wrapper Ends here ---------------------------------------------------->
+
+
+
+<footer class="footer fontSize">
+<div class="container">
+    <div class="region region-footer">
+    <section id="block-cmf-content-footer-region-block" class="block block-cmf-content clearfix">
+
+      
+  <footer class="wrapper footer-wrapper">
+	<div class="footer-top-wrapper">
+    	<div class="container footer-top-container"><ul class="menu nav"><li class="first leaf"><a href="/website-policy" title="">Website Policies</a></li>
+<li class="leaf"><a href="/help">Help</a></li>
+<li class="leaf"><a href="/contact-us">Contact us</a></li>
+<li class="leaf"><a href="/web-information-manager" title="">Web Information Manager</a></li>
+<li class="leaf"><a href="/feedback" title="">Feedback</a></li>
+<li class="leaf"><a href="/privacy-policy" title="">Privacy Policy</a></li>
+<li class="last leaf"><a href="/disclaimer-">Disclaimer</a></li>
+</ul></div>
+    </div>
+    <div class="footer-bottom-wrapper">
+    	<div class="container footer-bottom-container">
+        	<div class="footer-content clearfix "><div class="copyright-content">
+            	Website Content Managed by © Content Owned by Union Public Service Commission, New Delhi, India.
+             <span class="lastupdated">Last Updated: 14 May 2025</span>
+            </div>
+            
+             <!--div class="logo-cmf">
+            	<a href="#" target="_blank"><img src="https://upsc.gov.in/sites/all/modules/cmf/cmf_content/assets/images/cmf-logo.png" alt="Content Management Framework"></a>
+            </div-->
+                </div>
+        </div>
+    </div>
+</footer>
+</section> <!-- /.block -->
+  </div>
+  <div class="visitor-counter">
+   <ul class="visitor-ul"><li>     
+	   Visitor No:862830641</li>
+   
+   </ul>
+   
+   <p><small>     
+	   (Since: 15  Sep 2016)</small></p>
+
+  </div>
+
+  </div>
+</footer>
+
+
+  <script src="https://upsc.gov.in/sites/default/files/js/js_B2uv6dkjoYobfQVyuXdchgrpnnx4oM0TkP_bDVf8Qrg.js"></script>
+</body>
+</html>

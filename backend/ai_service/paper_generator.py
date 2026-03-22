@@ -1,20 +1,50 @@
 import json
 import google.generativeai as genai
 from django.conf import settings
+from PyPDF2 import PdfReader
+import io
 
 # Configure Gemini
 genai.configure(api_key=settings.GEMINI_API_KEY)
 # Using gemma-3-4b-it as verified to work on free tier
 model = genai.GenerativeModel('gemma-3-4b-it')
 
+def extract_text_from_pdf(file_path):
+    """Utility to extract text from a PDF file."""
+    try:
+        reader = PdfReader(file_path)
+        text = ""
+        # Read up to 10 pages to avoid context window issues
+        for i in range(min(10, len(reader.pages))):
+            text += reader.pages[i].extract_text() + "\n"
+        return text
+    except Exception as e:
+        print(f"Error extracting PDF text: {e}")
+        return ""
+
 def generate_exam_paper(exam_type: str, subject: str, chapters: list[str], 
-                         total_questions: int = 10, difficulty: str = 'mixed') -> dict:
+                         total_questions: int = 10, difficulty: str = 'mixed',
+                         reference_papers: list[str] = None) -> dict:
     """
     Generate exam questions using Gemini AI.
-    Returns a dict with list of questions.
+    If reference_papers (list of text) is provided, pick/adapt questions from them.
     """
     chapter_list = ", ".join(chapters)
-    prompt = f"""Generate {total_questions} exam questions for the following:
+    
+    source_instruction = ""
+    if reference_papers:
+        combined_ref = "\n---\n".join(reference_papers)
+        source_instruction = f"""
+I am providing some PREVIOUS YEAR PAPERS as reference below. 
+Please PICK or CLOSELY ADAPT {total_questions} questions from these reference texts that match the chapters: {chapter_list}.
+
+REFERENCE PAPERS CONTENT:
+{combined_ref}
+---
+"""
+
+    prompt = f"""{source_instruction}
+Generate {total_questions} exam questions for the following:
 
 Exam: {exam_type}
 Subject: {subject}
@@ -56,7 +86,6 @@ Return ONLY valid JSON, no extra text."""
     try:
         return json.loads(response_text)
     except json.JSONDecodeError:
-        # Fallback: if JSON is broken, try a simpler extract or re-raise
         print(f"Failed to decode JSON. Raw response: {response_text}")
         raise
 

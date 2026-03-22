@@ -7,7 +7,7 @@ from users.views import IsAdmin
 from .models import GeneratedPaper, Question, AssignedPaper, PreviousYearPaper
 from .serializers import (GeneratedPaperSerializer, GeneratePaperInputSerializer, 
                         AssignedPaperSerializer, PreviousYearPaperSerializer)
-from ai_service.paper_generator import generate_exam_paper
+from ai_service.paper_generator import generate_exam_paper, extract_text_from_pdf
 
 
 class PaperViewSet(viewsets.ReadOnlyModelViewSet):
@@ -25,7 +25,6 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
     def generate(self, request):
         serializer = GeneratePaperInputSerializer(data=request.data)
         if not serializer.is_valid():
-            print(f"Validation Error: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         data = serializer.validated_data
 
@@ -33,6 +32,15 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
         subject = Subject.objects.get(id=data['subject_id'])
         chapters = Chapter.objects.filter(id__in=data['chapter_ids'])
         chapter_names = list(chapters.values_list('name', flat=True))
+
+        # Extract text from old papers if provided
+        reference_texts = []
+        if data.get('old_paper_ids'):
+            old_papers = PreviousYearPaper.objects.filter(id__in=data['old_paper_ids'])
+            for op in old_papers:
+                text = extract_text_from_pdf(op.file.path)
+                if text:
+                    reference_texts.append(text)
 
         title = data.get('title') or f"{exam_type.code} - {subject.name} Paper"
         paper = GeneratedPaper.objects.create(
@@ -48,7 +56,8 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
             result = generate_exam_paper(
                 exam_type=exam_type.name, subject=subject.name,
                 chapters=chapter_names, total_questions=data['total_questions'],
-                difficulty=data['difficulty']
+                difficulty=data['difficulty'],
+                reference_papers=reference_texts if reference_texts else None
             )
             for q in result.get('questions', []):
                 chapter = chapters.filter(name=q.get('chapter', '')).first() or chapters.first()

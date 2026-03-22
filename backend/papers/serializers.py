@@ -36,6 +36,7 @@ class GeneratePaperInputSerializer(serializers.Serializer):
     total_questions = serializers.IntegerField(default=30, min_value=5, max_value=100)
     difficulty = serializers.ChoiceField(choices=['easy', 'medium', 'hard', 'mixed'], default='mixed')
     duration_minutes = serializers.IntegerField(default=60, min_value=5, max_value=180)
+    old_paper_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list)
 
 
 class AssignedPaperSerializer(serializers.ModelSerializer):

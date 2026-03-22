@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Grid, Paper, TextField, Button, Alert, MenuItem,
   Select, InputLabel, FormControl, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, IconButton, Tooltip, CircularProgress
+  TableContainer, TableHead, TableRow, IconButton, Tooltip, CircularProgress,
+  Avatar, Chip
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,9 +27,10 @@ function OldPapers() {
         api.get('/papers/old-papers/'),
         api.get('/exam-types/')
       ]);
-      setPapers(pRes.data.results || pRes.data);
-      setExamTypes(eRes.data.results || eRes.data);
+      setPapers(pRes.data?.results || pRes.data || []);
+      setExamTypes(eRes.data?.results || eRes.data || []);
     } catch (err) {
+      console.error(err);
       setError('Failed to load data.');
     } finally {
       setLoading(false);
@@ -39,6 +41,7 @@ function OldPapers() {
 
   const handleUpload = async (e) => {
     e.preventDefault();
+    setError(''); setSuccess('');
     if (!file || !form.exam_type || !form.title) {
       setError('Please fill all required fields and select a file.');
       return;
@@ -68,16 +71,22 @@ function OldPapers() {
     if (!window.confirm('Delete this paper?')) return;
     try {
       await api.delete(`/papers/old-papers/${id}/`);
+      setSuccess('Paper deleted.');
       fetchData();
     } catch (err) {
       setError('Failed to delete paper.');
     }
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}><CircularProgress /></Box>;
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
     <Box sx={{ p: 3, maxWidth: 1100, mx: 'auto' }}>
+      {/* Header */}
       <Box sx={{
         background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
         borderRadius: 3, p: 3, mb: 4, color: '#fff'
@@ -89,6 +98,7 @@ function OldPapers() {
       </Box>
 
       <Grid container spacing={3}>
+        {/* Upload Form */}
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" fontWeight={700} mb={3}>Upload Paper</Typography>
@@ -97,14 +107,15 @@ function OldPapers() {
 
             <form onSubmit={handleUpload}>
               <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                <InputLabel>Exam Type</InputLabel>
+                <InputLabel id="exam-type-select-label">Exam Type</InputLabel>
                 <Select
+                  labelId="exam-type-select-label"
                   value={form.exam_type}
                   label="Exam Type"
                   onChange={e => setForm({ ...form, exam_type: e.target.value })}
                   required
                 >
-                  {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
+                  {(examTypes || []).map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                 </Select>
               </FormControl>
 
@@ -136,6 +147,7 @@ function OldPapers() {
           </Paper>
         </Grid>
 
+        {/* Papers List */}
         <Grid item xs={12} md={8}>
           <TableContainer component={Paper} sx={{ borderRadius: 3, overflow: 'hidden' }}>
             <Table size="small">
@@ -147,7 +159,7 @@ function OldPapers() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {papers.map(row => (
+                {(papers || []).map(row => (
                   <TableRow key={row.id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -177,7 +189,7 @@ function OldPapers() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {papers.length === 0 && (
+                {(!papers || papers.length === 0) && (
                   <TableRow>
                     <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
                       <Typography color="text.secondary">No papers uploaded yet.</Typography>
