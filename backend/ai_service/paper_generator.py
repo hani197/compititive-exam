@@ -1,15 +1,16 @@
 import json
-import anthropic
+import google.generativeai as genai
 from django.conf import settings
 
-
-client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-
+# Configure Gemini
+genai.configure(api_key=settings.GEMINI_API_KEY)
+# Using gemma-3-4b-it as verified to work on free tier
+model = genai.GenerativeModel('gemma-3-4b-it')
 
 def generate_exam_paper(exam_type: str, subject: str, chapters: list[str], 
-                         total_questions: int = 30, difficulty: str = 'mixed') -> dict:
+                         total_questions: int = 10, difficulty: str = 'mixed') -> dict:
     """
-    Generate exam questions using Claude AI.
+    Generate exam questions using Gemini AI.
     Returns a dict with list of questions.
     """
     chapter_list = ", ".join(chapters)
@@ -43,25 +44,25 @@ Generate a mix of MCQ questions. For each question return JSON with this exact f
 Make questions relevant to {exam_type} exam pattern in India.
 Return ONLY valid JSON, no extra text."""
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=8192,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    response_text = message.content[0].text.strip()
+    response = model.generate_content(prompt)
+    response_text = response.text.strip()
+    
     # Extract JSON if wrapped in markdown
-    if response_text.startswith("```"):
-        response_text = response_text.split("```")[1]
-        if response_text.startswith("json"):
-            response_text = response_text[4:]
+    if "```json" in response_text:
+        response_text = response_text.split("```json")[1].split("```")[0].strip()
+    elif "```" in response_text:
+        response_text = response_text.split("```")[1].split("```")[0].strip()
 
-    return json.loads(response_text)
-
+    try:
+        return json.loads(response_text)
+    except json.JSONDecodeError:
+        # Fallback: if JSON is broken, try a simpler extract or re-raise
+        print(f"Failed to decode JSON. Raw response: {response_text}")
+        raise
 
 def evaluate_descriptive_answer(question: str, correct_answer: str, student_answer: str, marks: float) -> dict:
     """
-    Evaluate a descriptive answer using Claude AI.
+    Evaluate a descriptive answer using Gemini AI.
     """
     prompt = f"""Evaluate this student's answer for the exam question:
 
@@ -81,20 +82,15 @@ Evaluate and return JSON:
 
 Return ONLY valid JSON."""
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    response_text = message.content[0].text.strip()
-    if response_text.startswith("```"):
-        response_text = response_text.split("```")[1]
-        if response_text.startswith("json"):
-            response_text = response_text[4:]
+    response = model.generate_content(prompt)
+    response_text = response.text.strip()
+    
+    if "```json" in response_text:
+        response_text = response_text.split("```json")[1].split("```")[0].strip()
+    elif "```" in response_text:
+        response_text = response_text.split("```")[1].split("```")[0].strip()
 
     return json.loads(response_text)
-
 
 def generate_performance_analysis(student_name: str, exam_type: str, subject: str,
                                    chapter_analysis: dict, percentage: float) -> str:
@@ -118,10 +114,5 @@ Provide:
 
 Keep it encouraging, specific, and actionable. Response in plain text (no JSON)."""
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return message.content[0].text.strip()
+    response = model.generate_content(prompt)
+    return response.text.strip()

@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/papers/', include('papers.urls')),
     path('api/sessions/', include('exam_sessions.urls')),
     path('api/results/', include('results.urls')),
+    path('api/coaching/', include('coaching_centres.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

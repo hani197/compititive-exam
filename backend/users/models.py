@@ -13,6 +13,10 @@ class User(AbstractUser):
     phone = models.CharField(max_length=15, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    coaching_centre = models.ForeignKey(
+        'coaching_centres.CoachingCentre', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='users'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -29,12 +33,22 @@ class RegistrationRequest(models.Model):
     ROLE_CHOICES = [
         ('student', 'Student'),
         ('instructor', 'Instructor'),
+        ('coaching_centre', 'Coaching Centre'),
     ]
 
     full_name = models.CharField(max_length=200)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
     email = models.EmailField()
     phone = models.CharField(max_length=15)
+    
+    # Centre specific fields
+    centre_name = models.CharField(max_length=255, blank=True, null=True)
+    centre_address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    coaching_centre = models.ForeignKey(
+        'coaching_centres.CoachingCentre', on_delete=models.SET_NULL, 
+        null=True, blank=True, related_name='registration_requests'
+    )
     exam_interested = models.ForeignKey(
         'exams.ExamType', on_delete=models.SET_NULL, null=True, blank=True
     )

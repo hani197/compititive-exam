@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'papers',
     'exam_sessions',
     'results',
+    'coaching_centres',
 ]
 
 MIDDLEWARE = [
@@ -116,6 +117,9 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
 ]
 
 ANTHROPIC_API_KEY = config('ANTHROPIC_API_KEY', default='')
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')

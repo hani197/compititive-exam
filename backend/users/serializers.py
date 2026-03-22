@@ -41,7 +41,8 @@ class RegistrationRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationRequest
         fields = ['id', 'full_name', 'role', 'email', 'phone', 'exam_interested',
-                  'exam_interested_name', 'message', 'status', 'requested_at']
+                  'exam_interested_name', 'centre_name', 'centre_address', 'city',
+                  'coaching_centre', 'message', 'status', 'requested_at']
         read_only_fields = ['id', 'status', 'requested_at']
 
     def get_exam_interested_name(self, obj):

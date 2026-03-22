@@ -23,7 +23,9 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['post'], url_path='generate', permission_classes=[IsAdmin])
     def generate(self, request):
         serializer = GeneratePaperInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            print(f"Validation Error: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         data = serializer.validated_data
 
         exam_type = ExamType.objects.get(id=data['exam_type_id'])
