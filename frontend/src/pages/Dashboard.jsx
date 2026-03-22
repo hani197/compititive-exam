@@ -40,6 +40,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState({ assignments: [], stats: null, sessions: [], oldPapers: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const isAdmin = user?.role === 'admin' || user?.is_staff;
 
   useEffect(() => {
@@ -47,18 +48,28 @@ function Dashboard() {
       ? [api.get('/results/dashboard/'), api.get('/papers/old-papers/')] 
       : [api.get('/papers/assignments/'), api.get('/results/dashboard/'), api.get('/sessions/'), api.get('/papers/old-papers/')];
 
-    Promise.all(endpoints).then(res => {
-      if (isAdmin) {
-        setData(prev => ({ ...prev, stats: res[0].data, oldPapers: res[1].data.results || res[1].data }));
-      } else {
-        setData({
-          assignments: res[0].data.results || res[0].data,
-          stats: res[1].data,
-          sessions: res[2].data.results || res[2].data,
-          oldPapers: res[3].data.results || res[3].data,
-        });
-      }
-    }).finally(() => setLoading(false));
+    Promise.all(endpoints)
+      .then(res => {
+        if (isAdmin) {
+          setData(prev => ({ 
+            ...prev, 
+            stats: res[0].data || null, 
+            oldPapers: res[1].data?.results || res[1].data || [] 
+          }));
+        } else {
+          setData({
+            assignments: res[0].data?.results || res[0].data || [],
+            stats: res[1].data || null,
+            sessions: res[2].data?.results || res[2].data || [],
+            oldPapers: res[3].data?.results || res[3].data || [],
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Dashboard data fetch error:", err);
+        setError("Failed to load dashboard data. Please try again later.");
+      })
+      .finally(() => setLoading(false));
   }, [isAdmin]);
 
   if (loading) return (
@@ -67,9 +78,21 @@ function Dashboard() {
     </Box>
   );
 
+  if (error) return (
+    <Box sx={{ p: 3, maxWidth: 600, mx: 'auto', mt: 10 }}>
+      <Alert severity="error" variant="filled">{error}</Alert>
+      <Button fullWidth variant="outlined" sx={{ mt: 2 }} onClick={() => window.location.reload()}>Retry</Button>
+    </Box>
+  );
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const statsList = isAdmin ? ADMIN_STATS : STUDENT_STATS;
+
+  // Safe pending count calculation
+  const pendingCount = isAdmin ? 0 : (data.assignments || []).filter(a => 
+    !(data.sessions || []).find(s => (s.paper === a.paper_detail?.id || s.paper_detail?.id === a.paper_detail?.id) && s.status !== 'in_progress')
+  ).length;
 
   return (
     <Box sx={{ p: 3, maxWidth: 1240, mx: 'auto' }}>
@@ -79,7 +102,7 @@ function Dashboard() {
         borderRadius: 4, p: { xs: 3, md: 4 }, mb: 4, position: 'relative', overflow: 'hidden',
       }}>
         <Box sx={{ position: 'absolute', top: -30, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(168,85,247,0.3)', filter: 'blur(30px)' }} />
-        <Box sx={{ position: 'absolute', bottom: -40, left: '40%', width: 200, height: 200, borderRadius: '50%', background: 'rgba(249,115,22,0.2)', filter: 'blur(40px)' }} />
+        <Box sx={{ position: 'absolute', bottom: -40, left: '40%', width: 200, height: 200, borderRadius: '50%', background: 'rgba(249,115,22,0.25)', filter: 'blur(40px)' }} />
         <Box sx={{ position: 'relative', zIndex: 1 }}>
           <Typography variant="h4" color="#fff" fontWeight={800}>
             {greeting}, {user?.first_name || user?.username}! 👋
@@ -87,7 +110,7 @@ function Dashboard() {
           <Typography color="rgba(255,255,255,0.7)" mt={0.5} fontWeight={500}>
             {isAdmin 
               ? `Manage your coaching centre: ${user?.coaching_centre_name || 'Admin Panel'}` 
-              : `You have ${data.assignments.filter(a => !data.sessions.find(s => s.paper === a.paper_detail?.id && s.status !== 'in_progress')).length} pending exams.`}
+              : `You have ${pendingCount} pending exams.`}
           </Typography>
         </Box>
       </Box>
@@ -233,9 +256,9 @@ function AdminDashboardView({ stats, navigate }) {
 }
 
 function StudentDashboardView({ data, navigate }) {
-  const getSession = id => data.sessions.find(s => s.paper === id || s.paper_detail?.id === id);
-  const pending = data.assignments.filter(a => { const s = getSession(a.paper_detail?.id); return !s || s.status === 'in_progress'; });
-  const done = data.assignments.filter(a => { const s = getSession(a.paper_detail?.id); return s && s.status !== 'in_progress'; });
+  const getSession = id => (data.sessions || []).find(s => s.paper === id || s.paper_detail?.id === id);
+  const pending = (data.assignments || []).filter(a => { const s = getSession(a.paper_detail?.id); return !s || s.status === 'in_progress'; });
+  const done = (data.assignments || []).filter(a => { const s = getSession(a.paper_detail?.id); return s && s.status !== 'in_progress'; });
 
   const handleStart = async (paperId) => {
     const ex = getSession(paperId);
@@ -298,12 +321,13 @@ function StudentDashboardView({ data, navigate }) {
             {done.map(assignment => {
               const paper = assignment.paper_detail;
               const session = getSession(paper.id);
+              if (!session) return null;
               return (
                 <Grid item xs={12} sm={6} md={4} key={assignment.id}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <CardContent sx={{ flex: 1 }}>
-                      <Typography variant="h6" fontWeight={700}>{paper.title}</Typography>
-                      <Typography variant="body2" color="text.secondary">{paper.subject_name}</Typography>
+                      <Typography variant="h6" fontWeight={700}>{paper?.title || 'Untitled Paper'}</Typography>
+                      <Typography variant="body2" color="text.secondary">{paper?.subject_name}</Typography>
                     </CardContent>
                     <CardActions sx={{ p: 2, pt: 0 }}>
                       <Button fullWidth variant="outlined" color="success" onClick={() => navigate('/result/' + session.id)}>View Result</Button>
