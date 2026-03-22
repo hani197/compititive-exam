@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   Box, TextField, Button, Typography, Alert, MenuItem,
   Select, InputLabel, FormControl, Paper, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Chip, Avatar, Grid,
-  Divider, Accordion, AccordionSummary, AccordionDetails, CircularProgress, IconButton
+  TableCell, TableContainer, TableHead, TableRow, Chip, Avatar,
+  Divider, Accordion, AccordionSummary, AccordionDetails, CircularProgress, IconButton,
+  Grid2 as Grid
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';

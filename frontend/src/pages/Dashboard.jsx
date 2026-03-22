@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, CardActions, Button,
   Chip, CircularProgress, Avatar, LinearProgress, Paper, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Alert, IconButton
+  TableCell, TableContainer, TableHead, TableRow, Alert, IconButton,
+  Grid2 as Grid
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
