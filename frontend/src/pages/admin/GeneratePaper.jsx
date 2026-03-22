@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Button, FormControl, InputLabel,
   Select, MenuItem, TextField, Alert, CircularProgress, Chip, Paper, Avatar, 
-  Accordion, AccordionSummary, AccordionDetails, Divider, IconButton
+  Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Stack
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -81,7 +81,7 @@ function GeneratePaperPage() {
     try {
       const res = await api.post('/papers/generate/', form);
       setGeneratedPaper(res.data);
-      setExpanded('panel3'); // Move to assign section
+      setExpanded('panel3');
     } catch (err) {
       setError(err.response?.data?.error || 'AI generation failed. Please try again.');
     } finally { setLoading(false); }
@@ -107,7 +107,6 @@ function GeneratePaperPage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1000, mx: 'auto' }}>
-      {/* Header */}
       <Box sx={{
         background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
         borderRadius: 3, p: 3, mb: 4, color: '#fff', position: 'relative', overflow: 'hidden'
@@ -130,7 +129,7 @@ function GeneratePaperPage() {
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 3 }}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 3 }}>
+            <Stack spacing={3} sx={{ width: '100%' }}>
               <TextField
                 fullWidth label="Paper Title" value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
@@ -141,11 +140,12 @@ function GeneratePaperPage() {
                 <InputLabel id="exam-type-label">Exam Type</InputLabel>
                 <Select
                   labelId="exam-type-label"
+                  fullWidth
                   value={form.exam_type_id}
                   label="Exam Type"
                   onChange={e => setForm({ ...form, exam_type_id: e.target.value })}
                 >
-                  {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
+                  {(examTypes || []).map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                 </Select>
               </FormControl>
 
@@ -153,11 +153,12 @@ function GeneratePaperPage() {
                 <InputLabel id="subject-label">Subject</InputLabel>
                 <Select
                   labelId="subject-label"
+                  fullWidth
                   value={form.subject_id}
                   label="Subject"
                   onChange={e => setForm({ ...form, subject_id: e.target.value })}
                 >
-                  {subjects.map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
+                  {(subjects || []).map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                 </Select>
               </FormControl>
 
@@ -166,7 +167,7 @@ function GeneratePaperPage() {
                   <Typography variant="subtitle2" fontWeight={700} mb={1.5} color="text.secondary">
                     Select Chapters:
                   </Typography>
-                  {chapters.length > 0 ? (
+                  {(chapters || []).length > 0 ? (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {chapters.map(c => (
                         <Chip
@@ -180,32 +181,38 @@ function GeneratePaperPage() {
                       ))}
                     </Box>
                   ) : (
-                    <Alert severity="warning" variant="outlined">No chapters found for this subject.</Alert>
+                    <Alert severity="warning" variant="outlined">No chapters found for this subject. Please add chapters in the admin panel.</Alert>
                   )}
                 </Box>
               )}
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Difficulty</InputLabel>
-                  <Select value={form.difficulty} label="Difficulty" onChange={e => setForm({ ...form, difficulty: e.target.value })}>
-                    {difficulties.map(d => <MenuItem key={d} value={d}>{d.toUpperCase()}</MenuItem>)}
-                  </Select>
-                </FormControl>
-                <TextField
-                  fullWidth label="Questions" type="number" size="small"
-                  value={form.total_questions}
-                  onChange={e => setForm({ ...form, total_questions: +e.target.value })}
-                  InputProps={{ startAdornment: <QuizIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 18 }} /> }}
-                />
-                <TextField
-                  fullWidth label="Minutes" type="number" size="small"
-                  value={form.duration_minutes}
-                  onChange={e => setForm({ ...form, duration_minutes: +e.target.value })}
-                  InputProps={{ startAdornment: <TimerIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 18 }} /> }}
-                />
-              </Box>
-            </Box>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Difficulty</InputLabel>
+                    <Select value={form.difficulty} label="Difficulty" onChange={e => setForm({ ...form, difficulty: e.target.value })}>
+                      {difficulties.map(d => <MenuItem key={d} value={d}>{d.toUpperCase()}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <TextField
+                    fullWidth label="Questions" type="number" size="small"
+                    value={form.total_questions}
+                    onChange={e => setForm({ ...form, total_questions: +e.target.value })}
+                    InputProps={{ startAdornment: <QuizIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 18 }} /> }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <TextField
+                    fullWidth label="Minutes" type="number" size="small"
+                    value={form.duration_minutes}
+                    onChange={e => setForm({ ...form, duration_minutes: +e.target.value })}
+                    InputProps={{ startAdornment: <TimerIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 18 }} /> }}
+                  />
+                </Grid>
+              </Grid>
+            </Stack>
           </AccordionDetails>
         </Accordion>
 
@@ -218,39 +225,41 @@ function GeneratePaperPage() {
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 3 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="old-papers-label">Pick Questions from Previous Papers</InputLabel>
-              <Select
-                labelId="old-papers-label"
-                multiple
-                value={form.old_paper_ids}
-                onChange={e => setForm({ ...form, old_paper_ids: e.target.value })}
-                label="Pick Questions from Previous Papers"
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((id) => (
-                      <Chip key={id} label={oldPapers.find(p => p.id === id)?.title} size="small" />
-                    ))}
-                  </Box>
-                )}
-              >
-                {oldPapers.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>{p.title} ({p.year})</MenuItem>
-                ))}
-              </Select>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                If selected, the AI will prioritize extracting or adapting questions from these PDFs.
-              </Typography>
-            </FormControl>
+            <Stack spacing={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="old-papers-label">Pick Questions from Previous Papers</InputLabel>
+                <Select
+                  labelId="old-papers-label"
+                  multiple
+                  value={form.old_paper_ids}
+                  onChange={e => setForm({ ...form, old_paper_ids: e.target.value })}
+                  label="Pick Questions from Previous Papers"
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((id) => (
+                        <Chip key={id} label={oldPapers.find(p => p.id === id)?.title} size="small" />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {(oldPapers || []).map((p) => (
+                    <MenuItem key={p.id} value={p.id}>{p.title} ({p.year})</MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  If selected, the AI will prioritize extracting or adapting questions from these PDFs.
+                </Typography>
+              </FormControl>
 
-            <Button
-              variant="contained" size="large" fullWidth
-              onClick={handleGenerate} disabled={loading || !!generatedPaper}
-              startIcon={loading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <AutoAwesomeIcon />}
-              sx={{ mt: 4, py: 1.5, fontWeight: 800, borderRadius: 2, bgcolor: '#4338ca' }}
-            >
-              {loading ? 'AI is Generating Questions...' : generatedPaper ? 'Paper Generated ✓' : 'Start AI Generation'}
-            </Button>
+              <Button
+                variant="contained" size="large" fullWidth
+                onClick={handleGenerate} disabled={loading || !!generatedPaper}
+                startIcon={loading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <AutoAwesomeIcon />}
+                sx={{ py: 1.5, fontWeight: 800, borderRadius: 2, bgcolor: '#4338ca' }}
+              >
+                {loading ? 'AI is Generating Questions...' : generatedPaper ? 'Paper Generated ✓' : 'Start AI Generation'}
+              </Button>
+            </Stack>
           </AccordionDetails>
         </Accordion>
 
@@ -264,27 +273,29 @@ function GeneratePaperPage() {
           </AccordionSummary>
           <AccordionDetails sx={{ p: 3 }}>
             {generatedPaper && (
-              <>
-                <Alert severity="success" sx={{ mb: 3 }}>
+              <Stack spacing={3}>
+                <Alert severity="success" sx={{ mb: 1 }}>
                   <strong>{generatedPaper.title}</strong> created successfully with {generatedPaper.questions?.length} questions.
                 </Alert>
                 
-                <Typography variant="subtitle2" fontWeight={700} color="text.secondary" mb={2}>Select Students:</Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 4 }}>
-                  {students.filter(s => s.role === 'student').map(s => {
-                    const selected = selectedStudents.find(x => x.id === s.id);
-                    return (
-                      <Chip
-                        key={s.id}
-                        avatar={<Avatar sx={{ bgcolor: selected ? '#fff' : '#4338ca', color: selected ? '#4338ca' : '#fff', fontSize: 11 }}>{(s.first_name?.[0] || s.username?.[0] || '?').toUpperCase()}</Avatar>}
-                        label={`${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username}
-                        onClick={() => toggleStudent(s)}
-                        color={selected ? 'primary' : 'default'}
-                        variant={selected ? 'filled' : 'outlined'}
-                        sx={{ cursor: 'pointer', fontWeight: 600 }}
-                      />
-                    );
-                  })}
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700} color="text.secondary" mb={2}>Select Students:</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {(students || []).filter(s => s.role === 'student').map(s => {
+                      const selected = selectedStudents.find(x => x.id === s.id);
+                      return (
+                        <Chip
+                          key={s.id}
+                          avatar={<Avatar sx={{ bgcolor: selected ? '#fff' : '#4338ca', color: selected ? '#4338ca' : '#fff', fontSize: 11 }}>{(s.first_name?.[0] || s.username?.[0] || '?').toUpperCase()}</Avatar>}
+                          label={`${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username}
+                          onClick={() => toggleStudent(s)}
+                          color={selected ? 'primary' : 'default'}
+                          variant={selected ? 'filled' : 'outlined'}
+                          sx={{ cursor: 'pointer', fontWeight: 600 }}
+                        />
+                      );
+                    })}
+                  </Box>
                 </Box>
 
                 <Button
@@ -295,7 +306,7 @@ function GeneratePaperPage() {
                 >
                   {assigning ? 'Assigning...' : `Assign to ${selectedStudents.length} Selected Student(s)`}
                 </Button>
-              </>
+              </Stack>
             )}
           </AccordionDetails>
         </Accordion>
