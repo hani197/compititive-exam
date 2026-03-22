@@ -4,7 +4,9 @@ import {
   Button, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Avatar, IconButton, Tooltip, CircularProgress
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
@@ -17,6 +19,7 @@ function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ student: '', instructor: '', notes: '' });
+  const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -50,13 +53,33 @@ function Assignments() {
       return;
     }
     try {
-      await api.post('/auth/assignments/', form);
-      setSuccess('Assignment created successfully!');
-      setForm({ student: '', instructor: '', notes: '' });
+      if (editingId) {
+        await api.put(`/auth/assignments/${editingId}/`, form);
+        setSuccess('Assignment updated successfully!');
+      } else {
+        await api.post('/auth/assignments/', form);
+        setSuccess('Assignment created successfully!');
+      }
+      cancelEdit();
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.non_field_errors?.[0] || 'Assignment already exists or failed.');
+      setError(err.response?.data?.non_field_errors?.[0] || 'Action failed.');
     }
+  };
+
+  const handleEdit = (assign) => {
+    setEditingId(assign.id);
+    setForm({
+      student: assign.student,
+      instructor: assign.instructor,
+      notes: assign.notes || ''
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm({ student: '', instructor: '', notes: '' });
   };
 
   const handleDelete = async (id) => {
@@ -85,7 +108,14 @@ function Assignments() {
         {/* Assignment Form */}
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight={700} mb={3}>New Assignment</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" fontWeight={700}>{editingId ? 'Edit Assignment' : 'New Assignment'}</Typography>
+              {editingId && (
+                <IconButton size="small" color="error" onClick={cancelEdit}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              )}
+            </Box>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
             
@@ -118,11 +148,17 @@ function Assignments() {
 
               <Button 
                 fullWidth variant="contained" type="submit" 
-                startIcon={<PersonAddIcon />}
+                startIcon={editingId ? <EditIcon /> : <PersonAddIcon />}
+                color={editingId ? "warning" : "primary"}
                 sx={{ py: 1.2, borderRadius: 2 }}
               >
-                Assign Now
+                {editingId ? 'Update Assignment' : 'Assign Now'}
               </Button>
+              {editingId && (
+                <Button fullWidth variant="text" color="inherit" onClick={cancelEdit} sx={{ mt: 1 }}>
+                  Cancel
+                </Button>
+              )}
             </form>
           </Paper>
         </Grid>
@@ -168,11 +204,18 @@ function Assignments() {
                       </Box>
                     </TableCell>
                     <TableCell align="right">
-                      <Tooltip title="Remove Assignment">
-                        <IconButton color="error" onClick={() => handleDelete(row.id)} size="small">
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                        <Tooltip title="Edit Assignment">
+                          <IconButton color="primary" onClick={() => handleEdit(row)} size="small">
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Remove Assignment">
+                          <IconButton color="error" onClick={() => handleDelete(row.id)} size="small">
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
