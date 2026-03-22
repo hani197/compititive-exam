@@ -15,6 +15,15 @@ import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import CakeIcon from '@mui/icons-material/Cake';
+import HomeIcon from '@mui/icons-material/Home';
+import { 
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  List, ListItem, ListItemText, ListItemIcon
+} from '@mui/material';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
@@ -37,6 +46,8 @@ function RegisterUser() {
   const [expanded, setExpanded] = useState('panel1');
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewUser, setViewUser] = useState(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -147,6 +158,16 @@ function RegisterUser() {
     setEditingId(null);
     setForm(emptyForm);
     setExpanded('panel1');
+  };
+
+  const handleView = (user) => {
+    setViewUser(user);
+    setIsViewOpen(true);
+  };
+
+  const closeView = () => {
+    setViewUser(null);
+    setIsViewOpen(false);
   };
 
   const set = f => e => setForm({ ...form, [f]: e.target.value });
@@ -398,6 +419,9 @@ function RegisterUser() {
                         </TableCell>
                         <TableCell align="right">
                           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                            <IconButton size="small" color="info" onClick={() => handleView(u)}>
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
                             <IconButton size="small" color="primary" onClick={() => handleEdit(u)}>
                               <EditIcon fontSize="small" />
                             </IconButton>
@@ -422,6 +446,93 @@ function RegisterUser() {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* View Profile Dialog */}
+      <Dialog open={isViewOpen} onClose={closeView} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: '#f8fafc' }}>
+          <Avatar sx={{ bgcolor: '#7c3aed' }}>{viewUser?.first_name?.[0] || '?'}</Avatar>
+          <Box>
+            <Typography variant="h6" fontWeight={800} lineHeight={1.2}>
+              {viewUser?.first_name} {viewUser?.last_name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">@{viewUser?.username} · {viewUser?.role?.toUpperCase()}</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <List sx={{ pt: 0 }}>
+            <Box sx={{ p: 2, bgcolor: '#faf5ff' }}>
+              <Typography variant="overline" fontWeight={800} color="#7c3aed">Personal & Contact</Typography>
+            </Box>
+            <ListItem divider>
+              <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary="Email Address" secondary={viewUser?.email} />
+            </ListItem>
+            <ListItem divider>
+              <ListItemIcon><PhoneIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary="Mobile Number" secondary={viewUser?.phone || 'N/A'} />
+            </ListItem>
+            <ListItem divider>
+              <ListItemIcon><CakeIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary="Date of Birth / Age" secondary={`${viewUser?.date_of_birth || 'N/A'} (${viewUser?.age || '?'} years)`} />
+            </ListItem>
+            <ListItem divider>
+              <ListItemIcon><HomeIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary="Address" secondary={viewUser?.address || 'N/A'} />
+            </ListItem>
+
+            {viewUser?.role === 'student' && (
+              <>
+                <Box sx={{ p: 2, bgcolor: '#f0fdf4', mt: 1 }}>
+                  <Typography variant="overline" fontWeight={800} color="#166534">Student Details</Typography>
+                </Box>
+                <ListItem divider>
+                  <ListItemIcon><SupervisorAccountIcon fontSize="small" /></ListItemIcon>
+                  <ListItemText primary="Parent Details" secondary={`${viewUser?.parent_name || 'N/A'} (${viewUser?.parent_phone || 'N/A'})`} />
+                </ListItem>
+                <ListItem divider>
+                  <ListItemIcon><SchoolIcon fontSize="small" /></ListItemIcon>
+                  <ListItemText primary="Enrolled For" secondary={viewUser?.exam_type_name || 'No Exam Set'} />
+                </ListItem>
+                <Box sx={{ p: 2, bgcolor: '#f8fafc' }}>
+                  <Typography variant="caption" fontWeight={800}>Academic Records</Typography>
+                  <Grid container spacing={2} mt={0.5}>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" display="block" color="text.secondary">10TH CLASS</Typography>
+                      <Typography variant="body2" fontWeight={700}>{viewUser?.tenth_percentage}% ({viewUser?.tenth_year})</Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" display="block" color="text.secondary">INTER</Typography>
+                      <Typography variant="body2" fontWeight={700}>{viewUser?.intermediate_percentage}% ({viewUser?.intermediate_year})</Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" display="block" color="text.secondary">{viewUser?.degree_type || 'DEGREE'}</Typography>
+                      <Typography variant="body2" fontWeight={700}>{viewUser?.degree_percentage}% ({viewUser?.degree_year})</Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </>
+            )}
+
+            {viewUser?.role === 'instructor' && (
+              <>
+                <Box sx={{ p: 2, bgcolor: '#fff1f2', mt: 1 }}>
+                  <Typography variant="overline" fontWeight={800} color="#9f1239">Instructor Details</Typography>
+                </Box>
+                <ListItem divider>
+                  <ListItemIcon><SchoolIcon fontSize="small" /></ListItemIcon>
+                  <ListItemText primary="Field / Experience" secondary={`${viewUser?.faculty_field || 'N/A'} · ${viewUser?.experience_years || 0} years`} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Work History" secondary={viewUser?.work_history || 'No history provided'} />
+                </ListItem>
+              </>
+            )}
+          </List>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, bgcolor: '#f8fafc' }}>
+          <Button onClick={closeView} variant="contained">Close Profile</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
