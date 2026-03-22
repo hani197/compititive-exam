@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, RegistrationRequest
+from .models import User, RegistrationRequest, StudentInstructorAssignment
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -58,3 +58,14 @@ class RegistrationRequestSerializer(serializers.ModelSerializer):
 
     def get_exam_interested_name(self, obj):
         return obj.exam_interested.name if obj.exam_interested else None
+
+
+class StudentInstructorAssignmentSerializer(serializers.ModelSerializer):
+    instructor_detail = UserSerializer(source='instructor', read_only=True)
+    student_detail = UserSerializer(source='student', read_only=True)
+
+    class Meta:
+        model = StudentInstructorAssignment
+        fields = ['id', 'instructor', 'student', 'instructor_detail', 'student_detail', 
+                  'assigned_at', 'notes']
+        read_only_fields = ['id', 'assigned_at']

@@ -1,9 +1,10 @@
 from django.utils import timezone
-from rest_framework import generics, permissions, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
-from .models import User, RegistrationRequest
-from .serializers import RegisterSerializer, UserSerializer, RegistrationRequestSerializer
+from .models import User, RegistrationRequest, StudentInstructorAssignment
+from .serializers import (RegisterSerializer, UserSerializer, 
+                        RegistrationRequestSerializer, StudentInstructorAssignmentSerializer)
 
 
 class IsAdmin(permissions.BasePermission):
@@ -211,4 +212,31 @@ class StudentListView(generics.ListAPIView):
     permission_classes = [IsAdmin]
 
     def get_queryset(self):
-        return User.objects.filter(role__in=['student', 'instructor']).order_by('-created_at')
+        user = self.request.user
+        qs = User.objects.filter(role__in=['student', 'instructor'])
+        if not user.is_superuser and user.coaching_centre:
+            qs = qs.filter(coaching_centre=user.coaching_centre)
+        return qs.order_by('-created_at')
+
+
+class StudentInstructorAssignmentViewSet(viewsets.ModelViewSet):
+    serializer_class = StudentInstructorAssignmentSerializer
+    permission_classes = [IsAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = StudentInstructorAssignment.objects.all()
+        if not user.is_superuser and user.coaching_centre:
+            qs = qs.filter(student__coaching_centre=user.coaching_centre)
+        return qs.order_by('-assigned_at')
+
+    def perform_create(self, serializer):
+        serializer.save(assigned_by=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='my-students')
+    def my_students(self, request):
+        """For instructors: see their assigned students."""
+        if request.user.role != 'instructor':
+            return Response({'error': 'Only instructors can view their assigned students.'}, status=403)
+        assignments = StudentInstructorAssignment.objects.filter(instructor=request.user)
+        return Response(StudentInstructorAssignmentSerializer(assignments, many=True).data)

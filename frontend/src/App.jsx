@@ -6,23 +6,21 @@ import { Box } from '@mui/material';
 // Auth Pages
 import LoginPage from './pages/Login';
 import RegisterCentrePage from './pages/RegisterCentre';
-import RequestAccessPage from './pages/RequestAccess';
 
 // Student Pages
 import DashboardPage from './pages/Dashboard';
 import HistoryPage from './pages/History';
 import ExamSessionPage from './pages/ExamSession';
-// Auth Pages
-import LoginPage from './pages/Login';
-import RegisterCentrePage from './pages/RegisterCentre';
+import ResultViewPage from './pages/ResultView';
+import MaterialsPage from './pages/Materials';
+import PracticePage from './pages/Practice';
 
-// Student Pages
-...
 // Admin Pages
 import GeneratePaperPage from './pages/admin/GeneratePaper';
 import SubmissionsPage from './pages/admin/Submissions';
 import RegisterUserPage from './pages/admin/RegisterUser';
 import CoachingCentresPage from './pages/admin/CoachingCentres';
+import AssignmentsPage from './pages/admin/Assignments';
 
 import { withAuth, withAdmin } from './components/withAuth';
 
@@ -38,6 +36,10 @@ const AdminGenerate = withAdmin(GeneratePaperPage);
 const AdminSubmissions = withAdmin(SubmissionsPage);
 const AdminRegister = withAdmin(RegisterUserPage);
 const AdminCentres = withAdmin(CoachingCentresPage);
+const AdminAssignments = withAdmin(AssignmentsPage);
+
+function Layout() {
+  return (
     <>
       <Navbar />
       <Box sx={{ p: { xs: 0, sm: 2, md: 3 } }}>
@@ -73,6 +75,7 @@ function App() {
               <Route path="admin/submissions" element={<AdminSubmissions />} />
               <Route path="admin/register" element={<AdminRegister />} />
               <Route path="admin/coaching-centres" element={<AdminCentres />} />
+              <Route path="admin/assignments" element={<AdminAssignments />} />
             </Route>
 
             {/* Fallback */}

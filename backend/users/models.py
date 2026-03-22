@@ -100,3 +100,26 @@ class RegistrationRequest(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.status})"
+
+
+class StudentInstructorAssignment(models.Model):
+    instructor = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='assigned_students_set',
+        limit_choices_to={'role': 'instructor'}
+    )
+    student = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='assigned_instructors_set',
+        limit_choices_to={'role': 'student'}
+    )
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    assigned_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='made_assignments'
+    )
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('instructor', 'student')
+
+    def __str__(self):
+        return f"{self.student.username} assigned to {self.instructor.username}"
+

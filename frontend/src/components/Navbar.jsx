@@ -25,6 +25,7 @@ export default function Navbar() {
   const navItems = isAdmin
     ? [
         { label: 'Users', icon: <PeopleIcon fontSize="small" />, path: '/admin/register' },
+        { label: 'Assignments', icon: <AssignmentIcon fontSize="small" />, path: '/admin/assignments' },
         { label: 'Generate Paper', icon: <AutoAwesomeIcon fontSize="small" />, path: '/admin/generate-paper' },
         { label: 'Submissions', icon: <FactCheckIcon fontSize="small" />, path: '/admin/submissions' },
       ]

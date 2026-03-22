@@ -37,9 +37,31 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     def dashboard(self, request):
         user = request.user
         if user.role == 'admin' or user.is_staff:
-            total = ExamResult.objects.count()
-            pending = ExamResult.objects.filter(analysis_confirmed=False).count()
-            return Response({'total_submissions': total, 'pending_confirmation': pending})
+            from users.models import User
+            from papers.models import GeneratedPaper
+            
+            qs_users = User.objects.all()
+            if not user.is_superuser and user.coaching_centre:
+                qs_users = qs_users.filter(coaching_centre=user.coaching_centre)
+            
+            total_students = qs_users.filter(role='student').count()
+            total_instructors = qs_users.filter(role='instructor').count()
+            total_papers = GeneratedPaper.objects.count()
+            if not user.is_superuser and user.coaching_centre:
+                total_papers = GeneratedPaper.objects.filter(created_by__coaching_centre=user.coaching_centre).count()
+
+            recent_submissions = ExamResult.objects.all()
+            if not user.is_superuser and user.coaching_centre:
+                recent_submissions = recent_submissions.filter(student__coaching_centre=user.coaching_centre)
+            
+            return Response({
+                'is_admin': True,
+                'total_students': total_students,
+                'total_instructors': total_instructors,
+                'total_papers': total_papers,
+                'pending_confirmation': recent_submissions.filter(analysis_confirmed=False).count(),
+                'recent_results': ExamResultSerializer(recent_submissions.order_by('-evaluated_at')[:5], many=True).data
+            })
 
         results = ExamResult.objects.filter(student=user, analysis_confirmed=True)
         total = results.count()
