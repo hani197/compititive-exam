@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Button, FormControl, InputLabel,
   Select, MenuItem, TextField, Alert, CircularProgress, Chip, Paper, Avatar, 
-  Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Stack
+  Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Stack,
+  Grid2 as Grid
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -107,6 +107,7 @@ function GeneratePaperPage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1000, mx: 'auto' }}>
+      {/* Header */}
       <Box sx={{
         background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
         borderRadius: 3, p: 3, mb: 4, color: '#fff', position: 'relative', overflow: 'hidden'
@@ -255,7 +256,7 @@ function GeneratePaperPage() {
                 variant="contained" size="large" fullWidth
                 onClick={handleGenerate} disabled={loading || !!generatedPaper}
                 startIcon={loading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <AutoAwesomeIcon />}
-                sx={{ py: 1.5, fontWeight: 800, borderRadius: 2, bgcolor: '#4338ca' }}
+                sx={{ mt: 4, py: 1.5, fontWeight: 800, borderRadius: 2, bgcolor: '#4338ca' }}
               >
                 {loading ? 'AI is Generating Questions...' : generatedPaper ? 'Paper Generated ✓' : 'Start AI Generation'}
               </Button>
