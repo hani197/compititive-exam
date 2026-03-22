@@ -12,12 +12,13 @@ import RequestAccessPage from './pages/RequestAccess';
 import DashboardPage from './pages/Dashboard';
 import HistoryPage from './pages/History';
 import ExamSessionPage from './pages/ExamSession';
-import ResultViewPage from './pages/ResultView';
-import MaterialsPage from './pages/Materials';
-import PracticePage from './pages/Practice';
+// Auth Pages
+import LoginPage from './pages/Login';
+import RegisterCentrePage from './pages/RegisterCentre';
 
+// Student Pages
+...
 // Admin Pages
-import RequestsPage from './pages/admin/Requests';
 import GeneratePaperPage from './pages/admin/GeneratePaper';
 import SubmissionsPage from './pages/admin/Submissions';
 import RegisterUserPage from './pages/admin/RegisterUser';
@@ -33,14 +34,10 @@ const ProtectedResult = withAuth(ResultViewPage);
 const ProtectedMaterials = withAuth(MaterialsPage);
 const ProtectedPractice = withAuth(PracticePage);
 
-const AdminRequests = withAdmin(RequestsPage);
 const AdminGenerate = withAdmin(GeneratePaperPage);
 const AdminSubmissions = withAdmin(SubmissionsPage);
 const AdminRegister = withAdmin(RegisterUserPage);
 const AdminCentres = withAdmin(CoachingCentresPage);
-
-function Layout() {
-  return (
     <>
       <Navbar />
       <Box sx={{ p: { xs: 0, sm: 2, md: 3 } }}>
@@ -60,7 +57,6 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register-centre" element={<RegisterCentrePage />} />
-            <Route path="/request-access" element={<RequestAccessPage />} />
             
             {/* Protected Layout Routes */}
             <Route element={<Layout />}>
@@ -73,7 +69,6 @@ function App() {
               <Route path="practice/:examTypeId" element={<ProtectedPractice />} />
               
               {/* Admin Routes */}
-              <Route path="admin/requests" element={<AdminRequests />} />
               <Route path="admin/generate-paper" element={<AdminGenerate />} />
               <Route path="admin/submissions" element={<AdminSubmissions />} />
               <Route path="admin/register" element={<AdminRegister />} />

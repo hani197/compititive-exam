@@ -143,13 +143,6 @@ export default function LoginPage() {
           </form>
 
           <Box sx={{ mt: 4, pt: 3, borderTop: '1.5px dashed rgba(167,139,250,0.3)', textAlign: 'center' }}>
-            <Typography variant="body2" color="#7c3aed" fontWeight={500} mb={1}>
-              New student?{' '}
-              <Button size="small" onClick={() => navigate('/request-access')}
-                sx={{ fontWeight: 800, color: '#5b21b6', p: 0, minWidth: 0, textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                Request Access
-              </Button>
-            </Typography>
             <Typography variant="body2" color="#7c3aed" fontWeight={500}>
               Own a coaching centre?{' '}
               <Button size="small" onClick={() => navigate('/register-centre')}

@@ -17,6 +17,24 @@ class User(AbstractUser):
         'coaching_centres.CoachingCentre', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='users'
     )
+    
+    # Common Extra Fields
+    address = models.TextField(blank=True, null=True)
+    qualification = models.CharField(max_length=255, blank=True, null=True)
+
+    # Student Specific
+    parent_details = models.CharField(max_length=255, blank=True, null=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    tenth_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    intermediate_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    degree_type = models.CharField(max_length=50, blank=True, null=True) # BSc, BCom, BTech, etc.
+    degree_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Instructor Specific
+    experience_years = models.PositiveIntegerField(null=True, blank=True)
+    faculty_field = models.CharField(max_length=100, blank=True, null=True)
+    work_history = models.TextField(blank=True, null=True) # Previous/Current company/college
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -41,6 +59,23 @@ class RegistrationRequest(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=15)
     
+    # Extra fields for registration
+    address = models.TextField(blank=True, null=True)
+    qualification = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Student specific
+    parent_details = models.CharField(max_length=255, blank=True, null=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    tenth_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    intermediate_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    degree_type = models.CharField(max_length=50, blank=True, null=True)
+    degree_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Instructor specific
+    experience_years = models.PositiveIntegerField(null=True, blank=True)
+    faculty_field = models.CharField(max_length=100, blank=True, null=True)
+    work_history = models.TextField(blank=True, null=True)
+
     # Centre specific fields
     centre_name = models.CharField(max_length=255, blank=True, null=True)
     centre_address = models.TextField(blank=True, null=True)

@@ -24,7 +24,6 @@ export default function Navbar() {
 
   const navItems = isAdmin
     ? [
-        { label: 'Requests', icon: <AssignmentIcon fontSize="small" />, path: '/admin/requests' },
         { label: 'Users', icon: <PeopleIcon fontSize="small" />, path: '/admin/register' },
         { label: 'Generate Paper', icon: <AutoAwesomeIcon fontSize="small" />, path: '/admin/generate-paper' },
         { label: 'Submissions', icon: <FactCheckIcon fontSize="small" />, path: '/admin/submissions' },
@@ -46,7 +45,7 @@ export default function Navbar() {
         {/* Brand */}
         <Box
           sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', mr: 2 }}
-          onClick={() => navigate(isAdmin ? '/admin/requests' : '/dashboard')}
+          onClick={() => navigate(isAdmin ? '/admin/register' : '/dashboard')}
         >
           <Box sx={{
             bgcolor: 'rgba(255,255,255,0.18)',

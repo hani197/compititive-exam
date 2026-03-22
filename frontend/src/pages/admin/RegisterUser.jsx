@@ -9,7 +9,13 @@ import PeopleIcon from '@mui/icons-material/People';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
-const emptyForm = { username: '', email: '', first_name: '', last_name: '', password: '', password2: '', role: 'student', phone: '' };
+const emptyForm = { 
+  username: '', email: '', first_name: '', last_name: '', password: '', password2: '', 
+  role: 'student', phone: '', address: '', qualification: '',
+  parent_details: '', age: '', tenth_percentage: '', intermediate_percentage: '',
+  degree_type: '', degree_percentage: '', experience_years: '', faculty_field: '', 
+  work_history: '' 
+};
 
 function RegisterUser() {
   const [form, setForm] = useState(emptyForm);
@@ -91,6 +97,40 @@ function RegisterUser() {
                       </Select>
                     </FormControl>
                   </Grid>
+
+                  <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
+                  <Grid item xs={12}><TextField fullWidth label="Highest Qualification" value={form.qualification} onChange={set('qualification')} size="small" /></Grid>
+
+                  {form.role === 'student' && (
+                    <>
+                      <Grid item xs={6}><TextField fullWidth label="Parent Details" value={form.parent_details} onChange={set('parent_details')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Age" type="number" value={form.age} onChange={set('age')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="10th %" type="number" value={form.tenth_percentage} onChange={set('tenth_percentage')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Inter %" type="number" value={form.intermediate_percentage} onChange={set('intermediate_percentage')} size="small" /></Grid>
+                      <Grid item xs={6}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Degree Type</InputLabel>
+                          <Select value={form.degree_type} label="Degree Type" onChange={set('degree_type')}>
+                            <MenuItem value="BSc">BSc</MenuItem>
+                            <MenuItem value="BCom">BCom</MenuItem>
+                            <MenuItem value="BTech">BTech</MenuItem>
+                            <MenuItem value="BA">BA</MenuItem>
+                            <MenuItem value="Other">Other</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Degree %" type="number" value={form.degree_percentage} onChange={set('degree_percentage')} size="small" /></Grid>
+                    </>
+                  )}
+
+                  {form.role === 'instructor' && (
+                    <>
+                      <Grid item xs={6}><TextField fullWidth label="Experience (Years)" type="number" value={form.experience_years} onChange={set('experience_years')} size="small" /></Grid>
+                      <Grid item xs={6}><TextField fullWidth label="Faculty Field" value={form.faculty_field} onChange={set('faculty_field')} size="small" placeholder="e.g. Mathematics" /></Grid>
+                      <Grid item xs={12}><TextField fullWidth label="Work History" value={form.work_history} onChange={set('work_history')} size="small" multiline rows={2} placeholder="Previous company/college details" /></Grid>
+                    </>
+                  )}
+
                   <Grid item xs={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={set('password')} required size="small" /></Grid>
                   <Grid item xs={12}><TextField fullWidth label="Confirm Password" type="password" value={form.password2} onChange={set('password2')} required size="small" /></Grid>
                 </Grid>

@@ -143,6 +143,17 @@ def approve_request(request, pk):
                 'password2': request.data.get('password2'),
                 'role': request.data.get('role', reg.role),
                 'phone': reg.phone,
+                'address': reg.address,
+                'qualification': reg.qualification,
+                'parent_details': reg.parent_details,
+                'age': reg.age,
+                'tenth_percentage': reg.tenth_percentage,
+                'intermediate_percentage': reg.intermediate_percentage,
+                'degree_type': reg.degree_type,
+                'degree_percentage': reg.degree_percentage,
+                'experience_years': reg.experience_years,
+                'faculty_field': reg.faculty_field,
+                'work_history': reg.work_history,
             })
             serializer.is_valid(raise_exception=True)
             user = serializer.save()
