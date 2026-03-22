@@ -198,6 +198,14 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [IsAdmin]
 
+    def perform_create(self, serializer):
+        # Automatically link new user to the same centre as the admin who created them
+        user = self.request.user
+        if not user.is_superuser:
+            serializer.save(coaching_centre=user.coaching_centre)
+        else:
+            serializer.save()
+
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
