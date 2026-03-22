@@ -12,6 +12,9 @@ import ContactPageIcon from '@mui/icons-material/ContactPage';
 import SchoolIcon from '@mui/icons-material/School';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
@@ -32,6 +35,7 @@ function RegisterUser() {
   const [users, setUsers] = useState([]);
   const [examTypes, setExamTypes] = useState([]);
   const [expanded, setExpanded] = useState('panel1');
+  const [editingId, setEditingId] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -62,7 +66,8 @@ function RegisterUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setSuccess('');
-    if (form.password !== form.password2) {
+    
+    if (!editingId && form.password !== form.password2) {
       setError("Passwords do not match.");
       return;
     }
@@ -87,18 +92,56 @@ function RegisterUser() {
       delete submissionData.degree_year;
     }
 
+    // For updates, password is optional
+    if (editingId && !submissionData.password) {
+      delete submissionData.password;
+      delete submissionData.password2;
+    }
+
     try {
-      const res = await api.post('/auth/students/register/', submissionData);
-      setSuccess('Account created for ' + (res.data.first_name || res.data.username));
-      setForm(emptyForm);
-      setExpanded('panel1');
+      if (editingId) {
+        await api.patch(`/auth/students/${editingId}/`, submissionData);
+        setSuccess('Profile updated successfully.');
+      } else {
+        const res = await api.post('/auth/students/register/', submissionData);
+        setSuccess('Account created for ' + (res.data.first_name || res.data.username));
+      }
+      cancelEdit();
       fetchData();
     } catch (err) {
       const data = err.response?.data;
       setError(data && typeof data === 'object'
         ? Object.entries(data).map(([k, v]) => k + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' | ')
-        : 'Registration failed.');
+        : 'Action failed.');
     }
+  };
+
+  const handleEdit = (user) => {
+    setEditingId(user.id);
+    const editData = { ...emptyForm, ...user };
+    // Password should not be pre-filled
+    editData.password = '';
+    editData.password2 = '';
+    setForm(editData);
+    setExpanded('panel1');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+    try {
+      await api.delete(`/auth/students/${id}/`);
+      setSuccess('User deleted successfully.');
+      fetchData();
+    } catch (err) {
+      setError('Failed to delete user.');
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setExpanded('panel1');
   };
 
   const set = f => e => setForm({ ...form, [f]: e.target.value });
@@ -129,9 +172,17 @@ function RegisterUser() {
       <Grid container spacing={3}>
         {/* Registration Form Sections */}
         <Grid item xs={12} md={6}>
-          <Typography variant="h6" fontWeight={700} mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PersonAddIcon color="primary" /> Registration Form
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {editingId ? <EditIcon color="warning" /> : <PersonAddIcon color="primary" />} 
+              {editingId ? 'Edit User Profile' : 'Registration Form'}
+            </Typography>
+            {editingId && (
+              <Button size="small" variant="outlined" color="error" startIcon={<CloseIcon />} onClick={cancelEdit}>
+                Cancel Edit
+              </Button>
+            )}
+          </Box>
           
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
@@ -279,8 +330,13 @@ function RegisterUser() {
               </AccordionDetails>
             </Accordion>
 
-            <Button type="submit" variant="contained" fullWidth sx={{ py: 1.5, borderRadius: 3, fontWeight: 800, fontSize: '1rem', boxShadow: '0 8px 20px rgba(124,58,237,0.3)' }} startIcon={<PersonAddIcon />}>
-              Create {form.role.toUpperCase()} Account
+            <Button type="submit" variant="contained" fullWidth sx={{ 
+              py: 1.5, borderRadius: 3, fontWeight: 800, fontSize: '1rem', 
+              bgcolor: editingId ? '#f59e0b' : '#7c3aed',
+              '&:hover': { bgcolor: editingId ? '#d97706' : '#6d28d9' },
+              boxShadow: '0 8px 20px rgba(124,58,237,0.3)' 
+            }} startIcon={editingId ? <EditIcon /> : <PersonAddIcon />}>
+              {editingId ? 'Update Profile' : `Create ${form.role.toUpperCase()} Account`}
             </Button>
           </form>
         </Grid>
@@ -298,6 +354,7 @@ function RegisterUser() {
                     <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>User</TableCell>
                     <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Role</TableCell>
                     <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Exam / Qualification</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -325,6 +382,16 @@ function RegisterUser() {
                           ) : (
                             <Typography variant="caption" fontWeight={600}>{u.qualification || '—'}</Typography>
                           )}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                            <IconButton size="small" color="primary" onClick={() => handleEdit(u)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" color="error" onClick={() => handleDelete(u.id)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );

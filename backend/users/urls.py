@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import (RegisterView, ProfileView, StudentListView,
+from .views import (RegisterView, ProfileView, StudentListView, StudentDetailView,
                     RegistrationRequestCreateView, RegistrationRequestListView,
                     approve_request, reject_request, StudentInstructorAssignmentViewSet)
 
@@ -20,6 +20,7 @@ urlpatterns = [
     path('requests/<int:pk>/reject/', reject_request, name='reject-request'),
     path('students/register/', RegisterView.as_view(), name='register'),
     path('students/', StudentListView.as_view(), name='student-list'),
+    path('students/<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
     
     # Assignments
     path('', include(router.urls)),

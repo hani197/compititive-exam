@@ -146,15 +146,20 @@ def approve_request(request, pk):
                 'phone': reg.phone,
                 'address': reg.address,
                 'qualification': reg.qualification,
-                'parent_details': reg.parent_details,
+                'parent_name': reg.parent_name,
+                'parent_phone': reg.parent_phone,
                 'age': reg.age,
                 'tenth_percentage': reg.tenth_percentage,
+                'tenth_year': reg.tenth_year,
                 'intermediate_percentage': reg.intermediate_percentage,
+                'intermediate_year': reg.intermediate_year,
                 'degree_type': reg.degree_type,
                 'degree_percentage': reg.degree_percentage,
+                'degree_year': reg.degree_year,
                 'experience_years': reg.experience_years,
                 'faculty_field': reg.faculty_field,
                 'work_history': reg.work_history,
+                'exam_type': reg.exam_interested.id if reg.exam_interested else None,
             })
             serializer.is_valid(raise_exception=True)
             user = serializer.save()
@@ -199,12 +204,24 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [IsAdmin]
 
     def perform_create(self, serializer):
-        # Automatically link new user to the same centre as the admin who created them
         user = self.request.user
         if not user.is_superuser:
             serializer.save(coaching_centre=user.coaching_centre)
         else:
             serializer.save()
+
+
+class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Admin-only: update or delete a student/instructor."""
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = User.objects.filter(role__in=['student', 'instructor'])
+        if not user.is_superuser and user.coaching_centre:
+            qs = qs.filter(coaching_centre=user.coaching_centre)
+        return qs
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
