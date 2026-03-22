@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, CardActions, Button,
   Chip, CircularProgress, Avatar, LinearProgress, Paper, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Alert, IconButton
+  TableCell, TableContainer, TableHead, TableRow, Alert, IconButton, Stack
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -70,7 +69,7 @@ function Dashboard() {
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
-        setError("Failed to load dashboard. Please refresh.");
+        setError("Failed to load dashboard data.");
       } finally {
         setLoading(false);
       }
@@ -101,14 +100,13 @@ function Dashboard() {
   ).length;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1240, mx: 'auto' }}>
+    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1240, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{
         background: 'linear-gradient(135deg, #3b0764 0%, #5b21b6 50%, #7c3aed 100%)',
         borderRadius: 4, p: { xs: 3, md: 4 }, mb: 4, position: 'relative', overflow: 'hidden',
       }}>
         <Box sx={{ position: 'absolute', top: -30, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(168,85,247,0.3)', filter: 'blur(30px)' }} />
-        <Box sx={{ position: 'absolute', bottom: -40, left: '40%', width: 200, height: 200, borderRadius: '50%', background: 'rgba(249,115,22,0.25)', filter: 'blur(40px)' }} />
         <Box sx={{ position: 'relative', zIndex: 1 }}>
           <Typography variant="h4" color="#fff" fontWeight={800}>
             {greeting}, {user?.first_name || user?.username}! 👋
@@ -121,10 +119,10 @@ function Dashboard() {
         </Box>
       </Box>
 
-      {/* Stats Grid */}
-      <Grid container spacing={2.5} sx={{ mb: 5 }}>
+      {/* Stats Grid - Using Box/Flex instead of Grid */}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2.5, mb: 5 }}>
         {statsList.map(card => (
-          <Grid size={{ xs: 12, sm: 6, md: isAdmin ? 3 : 4 }} key={card.label}>
+          <Box key={card.label} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
             <Card sx={{ background: card.gradient, boxShadow: `0 8px 32px ${card.shadow}`, border: 'none', borderRadius: 3 }}>
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2.5 }}>
                 <Box sx={{ bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 2.5, p: 1.2, display: 'flex', backdropFilter: 'blur(10px)' }}>
@@ -140,9 +138,9 @@ function Dashboard() {
                 </Box>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {isAdmin ? (
         <AdminDashboardView stats={data.stats} navigate={navigate} />
@@ -155,8 +153,8 @@ function Dashboard() {
 
 function AdminDashboardView({ stats, navigate }) {
   return (
-    <Grid container spacing={3}>
-      <Grid size={{ xs: 12, md: 8 }}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+      <Box sx={{ flex: { xs: '1 1 auto', md: '2 1 0' } }}>
         <Paper sx={{ p: 0, borderRadius: 3, overflow: 'hidden' }}>
           <Box sx={{ p: 2.5, borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" fontWeight={800}>Recent Submissions</Typography>
@@ -173,7 +171,7 @@ function AdminDashboardView({ stats, navigate }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stats?.recent_results?.map(r => (
+                {(stats?.recent_results || []).map(r => (
                   <TableRow key={r.id} hover>
                     <TableCell>
                       <Typography variant="body2" fontWeight={600}>{r.student_name}</Typography>
@@ -204,18 +202,19 @@ function AdminDashboardView({ stats, navigate }) {
             </Table>
           </TableContainer>
         </Paper>
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Card sx={{ borderRadius: 3, mb: 3 }}>
+      </Box>
+
+      <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 0' }, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Card sx={{ borderRadius: 3 }}>
           <CardContent>
             <Typography variant="h6" fontWeight={800} mb={2}>Quick Actions</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Stack spacing={1.5}>
               <Button fullWidth variant="outlined" startIcon={<AutoAwesomeIcon />} onClick={() => navigate('/admin/generate-paper')}>Generate Paper</Button>
               <Button fullWidth variant="outlined" startIcon={<PeopleIcon />} onClick={() => navigate('/admin/register')}>Add Students</Button>
               <Button fullWidth variant="outlined" startIcon={<AssignmentIcon />} onClick={() => navigate('/admin/assignments')}>Assign Mentors</Button>
               <Button fullWidth variant="outlined" startIcon={<HistoryIcon />} onClick={() => navigate('/admin/old-papers')}>Old Papers</Button>
               <Button fullWidth variant="outlined" startIcon={<FactCheckIcon />} onClick={() => navigate('/admin/submissions')}>Review Results</Button>
-            </Box>
+            </Stack>
           </CardContent>
         </Card>
 
@@ -227,7 +226,7 @@ function AdminDashboardView({ stats, navigate }) {
           <TableContainer sx={{ maxHeight: 300 }}>
             <Table size="small">
               <TableBody>
-                {stats?.old_papers?.map(p => (
+                {(stats?.old_papers || []).map(p => (
                   <TableRow key={p.id} hover>
                     <TableCell>
                       <Typography variant="body2" fontWeight={600} sx={{ maxWidth: 180 }} noWrap>{p.title}</Typography>
@@ -245,8 +244,8 @@ function AdminDashboardView({ stats, navigate }) {
             </Table>
           </TableContainer>
         </Paper>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }
 
@@ -265,9 +264,9 @@ function StudentDashboardView({ data, navigate }) {
   };
 
   return (
-    <>
+    <Stack spacing={4}>
       {pending.length > 0 && (
-        <>
+        <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
             <Box sx={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', borderRadius: 2, p: 0.8, display: 'flex' }}>
               <AssignmentIcon sx={{ color: '#fff', fontSize: 18 }} />
@@ -275,13 +274,13 @@ function StudentDashboardView({ data, navigate }) {
             <Typography variant="h6" fontWeight={700}>Pending Exams</Typography>
             <Chip label={pending.length} size="small" sx={{ bgcolor: '#ede9fe', color: '#5b21b6', fontWeight: 700 }} />
           </Box>
-          <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2.5 }}>
             {pending.map(assignment => {
               const paper = assignment.paper_detail;
               if (!paper) return null;
               const session = getSession(paper.id);
               return (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={assignment.id}>
+                <Box key={assignment.id} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 30%' } }}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <CardContent sx={{ flex: 1 }}>
                       <Typography variant="h6" fontWeight={700} mb={1}>{paper.title}</Typography>
@@ -297,28 +296,28 @@ function StudentDashboardView({ data, navigate }) {
                       </Button>
                     </CardActions>
                   </Card>
-                </Grid>
+                </Box>
               );
             })}
-          </Grid>
-        </>
+          </Box>
+        </Box>
       )}
 
       {done.length > 0 && (
-        <>
+        <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
             <Box sx={{ background: 'linear-gradient(135deg, #059669, #10b981)', borderRadius: 2, p: 0.8, display: 'flex' }}>
               <CheckCircleIcon sx={{ color: '#fff', fontSize: 18 }} />
             </Box>
             <Typography variant="h6" fontWeight={700}>Completed Exams</Typography>
           </Box>
-          <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2.5 }}>
             {done.map(assignment => {
               const paper = assignment.paper_detail;
               const session = getSession(paper.id);
               if (!session) return null;
               return (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={assignment.id}>
+                <Box key={assignment.id} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 30%' } }}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <CardContent sx={{ flex: 1 }}>
                       <Typography variant="h6" fontWeight={700}>{paper?.title || 'Untitled Paper'}</Typography>
@@ -328,24 +327,24 @@ function StudentDashboardView({ data, navigate }) {
                       <Button fullWidth variant="outlined" color="success" onClick={() => navigate('/result/' + session.id)}>View Result</Button>
                     </CardActions>
                   </Card>
-                </Grid>
+                </Box>
               );
             })}
-          </Grid>
-        </>
+          </Box>
+        </Box>
       )}
 
-      {data.oldPapers?.length > 0 && (
-        <Box sx={{ mt: 5, mb: 4 }}>
+      {(data.oldPapers || []).length > 0 && (
+        <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
             <Box sx={{ background: 'linear-gradient(135deg, #1e293b, #334155)', borderRadius: 2, p: 0.8, display: 'flex' }}>
               <HistoryIcon sx={{ color: '#fff', fontSize: 18 }} />
             </Box>
             <Typography variant="h6" fontWeight={700}>Previous Year Papers</Typography>
           </Box>
-          <Grid container spacing={2}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
             {data.oldPapers.map(paper => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={paper.id}>
+              <Box key={paper.id} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 30%' } }}>
                 <Paper sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, border: '1px solid #e2e8f0', transition: 'all 0.2s', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderColor: '#7c3aed' } }}>
                   <Avatar sx={{ bgcolor: '#fee2e2', color: '#dc2626' }}><PictureAsPdfIcon /></Avatar>
                   <Box sx={{ flex: 1, overflow: 'hidden' }}>
@@ -357,12 +356,12 @@ function StudentDashboardView({ data, navigate }) {
                   </Box>
                   <Button size="small" variant="outlined" component="a" href={paper.file} target="_blank">View</Button>
                 </Paper>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         </Box>
       )}
-    </>
+    </Stack>
   );
 }
 
