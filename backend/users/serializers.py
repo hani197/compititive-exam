@@ -14,7 +14,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                   'address', 'qualification', 'parent_name', 'parent_phone', 'age',
                   'tenth_percentage', 'tenth_year', 'intermediate_percentage', 
                   'intermediate_year', 'degree_type', 'degree_percentage', 'degree_year',
-                  'experience_years', 'faculty_field', 'work_history']
+                  'experience_years', 'faculty_field', 'work_history', 'exam_type']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -31,6 +31,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    exam_type_name = serializers.CharField(source='exam_type.name', read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name',
@@ -39,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'parent_name', 'parent_phone', 'age', 'tenth_percentage', 'tenth_year',
                   'intermediate_percentage', 'intermediate_year', 'degree_type', 
                   'degree_percentage', 'degree_year',
-                  'experience_years', 'faculty_field', 'work_history']
+                  'experience_years', 'faculty_field', 'work_history', 'exam_type', 'exam_type_name']
         read_only_fields = ['id', 'created_at', 'is_staff']
 
 

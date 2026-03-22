@@ -18,7 +18,7 @@ import api from '../../lib/api';
 const emptyForm = { 
   username: '', email: '', first_name: '', last_name: '', password: '', password2: '', 
   role: 'student', phone: '', date_of_birth: '', address: '', qualification: '',
-  parent_name: '', parent_phone: '', age: '', 
+  parent_name: '', parent_phone: '', age: '', exam_type: '',
   tenth_percentage: '', tenth_year: '',
   intermediate_percentage: '', intermediate_year: '',
   degree_type: '', degree_percentage: '', degree_year: '',
@@ -30,10 +30,21 @@ function RegisterUser() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [users, setUsers] = useState([]);
+  const [examTypes, setExamTypes] = useState([]);
   const [expanded, setExpanded] = useState('panel1');
 
-  const fetchUsers = () => api.get('/auth/students/').then(res => setUsers(res.data.results || res.data));
-  useEffect(() => { fetchUsers(); }, []);
+  const fetchData = async () => {
+    try {
+      const [u, e] = await Promise.all([
+        api.get('/auth/students/'),
+        api.get('/exam-types/')
+      ]);
+      setUsers(u.data.results || u.data);
+      setExamTypes(e.data.results || e.data);
+    } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   useEffect(() => {
     if (form.date_of_birth) {
@@ -60,7 +71,7 @@ function RegisterUser() {
       setSuccess('Account created for ' + (res.data.first_name || res.data.username));
       setForm(emptyForm);
       setExpanded('panel1');
-      fetchUsers();
+      fetchData();
     } catch (err) {
       const data = err.response?.data;
       setError(data && typeof data === 'object'
@@ -129,7 +140,17 @@ function RegisterUser() {
                   <Grid item xs={6}><TextField fullWidth label={form.role === 'student' ? "Candidate Mobile" : "Phone"} value={form.phone} onChange={set('phone')} required size="small" /></Grid>
                   <Grid item xs={6}><TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth} onChange={set('date_of_birth')} size="small" InputLabelProps={{ shrink: true }} /></Grid>
                   {form.role === 'student' && (
-                    <Grid item xs={12}><TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated from DOB" /></Grid>
+                    <>
+                      <Grid item xs={6}><TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated from DOB" /></Grid>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Joining for Exam Coaching</InputLabel>
+                          <Select value={form.exam_type} label="Joining for Exam Coaching" onChange={set('exam_type')}>
+                            {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </>
                   )}
                   <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
                 </Grid>
@@ -241,7 +262,7 @@ function RegisterUser() {
                   <TableRow>
                     <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>User</TableCell>
                     <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Role</TableCell>
-                    <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Qualification</TableCell>
+                    <TableCell sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>Exam / Qualification</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -264,7 +285,11 @@ function RegisterUser() {
                           <Chip label={u.role} size="small" sx={{ bgcolor: rs.bg, color: rs.color, fontWeight: 700, textTransform: 'capitalize', fontSize: '0.7rem' }} />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="caption" fontWeight={600}>{u.qualification || '—'}</Typography>
+                          {u.role === 'student' ? (
+                            <Typography variant="caption" fontWeight={700} color="primary">{u.exam_type_name || 'No Exam Set'}</Typography>
+                          ) : (
+                            <Typography variant="caption" fontWeight={600}>{u.qualification || '—'}</Typography>
+                          )}
                         </TableCell>
                       </TableRow>
                     );

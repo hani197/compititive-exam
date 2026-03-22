@@ -23,6 +23,9 @@ class User(AbstractUser):
     qualification = models.CharField(max_length=255, blank=True, null=True)
 
     # Student Specific
+    exam_type = models.ForeignKey(
+        'exams.ExamType', on_delete=models.SET_NULL, null=True, blank=True, related_name='enrolled_users'
+    )
     parent_name = models.CharField(max_length=200, blank=True, null=True)
     parent_phone = models.CharField(max_length=15, blank=True, null=True)
     age = models.PositiveIntegerField(null=True, blank=True)
@@ -68,6 +71,9 @@ class RegistrationRequest(models.Model):
     qualification = models.CharField(max_length=255, blank=True, null=True)
     
     # Student specific
+    exam_interested = models.ForeignKey(
+        'exams.ExamType', on_delete=models.SET_NULL, null=True, blank=True
+    )
     parent_name = models.CharField(max_length=200, blank=True, null=True)
     parent_phone = models.CharField(max_length=15, blank=True, null=True)
     age = models.PositiveIntegerField(null=True, blank=True)
