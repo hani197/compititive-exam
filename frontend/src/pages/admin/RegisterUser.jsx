@@ -66,8 +66,29 @@ function RegisterUser() {
       setError("Passwords do not match.");
       return;
     }
+
+    // Clean up data based on role to avoid validation errors
+    const submissionData = { ...form };
+    if (form.role === 'student') {
+      delete submissionData.experience_years;
+      delete submissionData.faculty_field;
+      delete submissionData.work_history;
+    } else if (form.role === 'instructor') {
+      delete submissionData.parent_name;
+      delete submissionData.parent_phone;
+      delete submissionData.age;
+      delete submissionData.exam_type;
+      delete submissionData.tenth_percentage;
+      delete submissionData.tenth_year;
+      delete submissionData.intermediate_percentage;
+      delete submissionData.intermediate_year;
+      delete submissionData.degree_type;
+      delete submissionData.degree_percentage;
+      delete submissionData.degree_year;
+    }
+
     try {
-      const res = await api.post('/auth/students/register/', form);
+      const res = await api.post('/auth/students/register/', submissionData);
       setSuccess('Account created for ' + (res.data.first_name || res.data.username));
       setForm(emptyForm);
       setExpanded('panel1');
