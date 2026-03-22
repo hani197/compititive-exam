@@ -11,6 +11,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
 import SchoolIcon from '@mui/icons-material/School';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
@@ -33,6 +34,19 @@ function RegisterUser() {
 
   const fetchUsers = () => api.get('/auth/students/').then(res => setUsers(res.data.results || res.data));
   useEffect(() => { fetchUsers(); }, []);
+
+  useEffect(() => {
+    if (form.date_of_birth) {
+      const birthDate = new Date(form.date_of_birth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      setForm(prev => ({ ...prev, age: age > 0 ? age : 0 }));
+    }
+  }, [form.date_of_birth]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,21 +128,33 @@ function RegisterUser() {
                   <Grid item xs={6}><TextField fullWidth label="Last Name" value={form.last_name} onChange={set('last_name')} size="small" /></Grid>
                   <Grid item xs={6}><TextField fullWidth label={form.role === 'student' ? "Candidate Mobile" : "Phone"} value={form.phone} onChange={set('phone')} required size="small" /></Grid>
                   <Grid item xs={6}><TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth} onChange={set('date_of_birth')} size="small" InputLabelProps={{ shrink: true }} /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
-                  
                   {form.role === 'student' && (
-                    <>
-                      <Grid item xs={12}><Divider sx={{ my: 1 }}><Typography variant="caption" fontWeight={700} color="text.secondary">PARENT / GUARDIAN DETAILS</Typography></Divider></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Parent Name" value={form.parent_name} onChange={set('parent_name')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Parent Mobile" value={form.parent_phone} onChange={set('parent_phone')} size="small" /></Grid>
-                      <Grid item xs={6}><TextField fullWidth label="Age" type="number" value={form.age} onChange={set('age')} size="small" /></Grid>
-                    </>
+                    <Grid item xs={12}><TextField fullWidth label="Candidate Age" type="number" value={form.age} InputProps={{ readOnly: true }} size="small" helperText="Auto-calculated from DOB" /></Grid>
                   )}
+                  <Grid item xs={12}><TextField fullWidth label="Address" value={form.address} onChange={set('address')} size="small" multiline rows={2} /></Grid>
                 </Grid>
               </AccordionDetails>
             </Accordion>
 
-            {/* Section 2: Qualification Details */}
+            {/* Section 2: Parent / Guardian Details (Student Only) */}
+            {form.role === 'student' && (
+              <Accordion expanded={expanded === 'panel_parent'} onChange={handleAccordionChange('panel_parent')} sx={{ borderRadius: '12px !important', mb: 1, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <SupervisorAccountIcon color="primary" fontSize="small" />
+                    <Typography fontWeight={700}>Parent / Guardian Details</Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}><TextField fullWidth label="Parent / Guardian Name" value={form.parent_name} onChange={set('parent_name')} size="small" /></Grid>
+                    <Grid item xs={12}><TextField fullWidth label="Parent Mobile Number" value={form.parent_phone} onChange={set('parent_phone')} size="small" /></Grid>
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+            )}
+
+            {/* Section 3: Qualification Details */}
             <Accordion expanded={expanded === 'panel2'} onChange={handleAccordionChange('panel2')} sx={{ borderRadius: '12px !important', mb: 1, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -179,7 +205,7 @@ function RegisterUser() {
               </AccordionDetails>
             </Accordion>
 
-            {/* Section 3: Credentials */}
+            {/* Section 4: Credentials */}
             <Accordion expanded={expanded === 'panel3'} onChange={handleAccordionChange('panel3')} sx={{ borderRadius: '12px !important', mb: 3, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
