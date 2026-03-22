@@ -146,7 +146,7 @@ function RegisterUser() {
                       <Grid item xs={6}>
                         <FormControl fullWidth size="small">
                           <InputLabel>Joining for Exam Coaching</InputLabel>
-                          <Select value={form.exam_type} label="Joining for Exam Coaching" onChange={set('exam_type')}>
+                          <Select fullWidth value={form.exam_type} label="Joining for Exam Coaching" onChange={set('exam_type')}>
                             {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                           </Select>
                         </FormControl>
