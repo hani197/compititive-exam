@@ -94,6 +94,8 @@ class RegistrationRequest(models.Model):
     centre_name = models.CharField(max_length=255, blank=True, null=True)
     centre_address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
+    username = models.CharField(max_length=150, blank=True, null=True)
+    password = models.CharField(max_length=128, blank=True, null=True)
     coaching_centre = models.ForeignKey(
         'coaching_centres.CoachingCentre', on_delete=models.SET_NULL, 
         null=True, blank=True, related_name='registration_requests'

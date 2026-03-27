@@ -22,6 +22,8 @@ export default function RegisterCentrePage() {
     centre_name: '',
     centre_address: '',
     city: '',
+    state: '',
+    pincode: '',
     username: '',
     password: '',
     message: ''
@@ -118,6 +120,18 @@ export default function RegisterCentrePage() {
                     fullWidth label="City" required
                     value={form.city} onChange={set('city')}
                     InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon /></InputAdornment> }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth label="State" required
+                    value={form.state} onChange={set('state')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth label="Pincode" required
+                    value={form.pincode} onChange={set('pincode')}
                   />
                 </Grid>
                 <Grid item xs={12}>

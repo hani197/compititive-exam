@@ -6,9 +6,10 @@ psycopg2-binary==2.9.11
 python-decouple==3.8
 anthropic==0.84.0
 pillow==11.3.0
-django-filter==24.3
+django-filter==25.1
 google-generativeai==0.8.6
-PyPDF2==3.0.1
+dj-database-url==2.1.0
+
 django-cloudinary-storage==0.3.0
 cloudinary==1.42.1
 gunicorn==21.2.0

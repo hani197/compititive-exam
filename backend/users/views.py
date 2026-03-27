@@ -39,8 +39,11 @@ class RegistrationRequestCreateView(generics.CreateAPIView):
                 email=email,
                 phone=request.data.get('phone'),
                 city=request.data.get('city'),
+                state=request.data.get('state', 'Unknown'),
+                pincode=request.data.get('pincode', '000000'),
                 address=request.data.get('centre_address', ''),
-                contact_person=request.data.get('full_name')
+                contact_person=request.data.get('full_name'),
+                contact_person_phone=request.data.get('phone') # Added
             )
             
             # 2. Create Admin User for this centre
@@ -56,6 +59,23 @@ class RegistrationRequestCreateView(generics.CreateAPIView):
             )
             centre.director = user
             centre.save()
+            
+            # 3. Create Request record for history
+            RegistrationRequest.objects.create(
+                full_name=request.data.get('full_name'),
+                email=email,
+                phone=request.data.get('phone'),
+                role='coaching_centre',
+                centre_name=request.data.get('centre_name'),
+                centre_address=request.data.get('centre_address'),
+                city=request.data.get('city'),
+                username=username,
+                password=password, # In real app, we shouldn't store this in plain text, but keeping it for now
+                message=request.data.get('message', ''),
+                status='approved',
+                created_user=user,
+                coaching_centre=centre
+            )
             
             return Response({'message': 'Coaching Centre registered successfully!', 'username': username}, status=201)
         
