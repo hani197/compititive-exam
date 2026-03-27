@@ -7,6 +7,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
+import QuizIcon from '@mui/icons-material/Quiz';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -19,7 +20,7 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const initials = user
-    ? ((user.first_name?.[0] || '') + (user.last_name?.[0] || '') || user.username?.[0] || '?').toUpperCase()
+    ? (user.first_name ? (user.first_name[0] + (user.last_name?.[0] || '')) : user.username[0]).toUpperCase()
     : '?';
 
   const navItems = isAdmin
@@ -28,6 +29,8 @@ export default function Navbar() {
         { label: 'Assignments', icon: <AssignmentIcon fontSize="small" />, path: '/admin/assignments' },
         { label: 'Old Papers', icon: <HistoryIcon fontSize="small" />, path: '/admin/old-papers' },
         { label: 'Generate Paper', icon: <AutoAwesomeIcon fontSize="small" />, path: '/admin/generate-paper' },
+        { label: 'Syllabus', icon: <SchoolIcon fontSize="small" />, path: '/admin/syllabus' },
+        { label: 'Library', icon: <QuizIcon fontSize="small" />, path: '/admin/generated-papers' },
         { label: 'Submissions', icon: <FactCheckIcon fontSize="small" />, path: '/admin/submissions' },
       ]
     : [

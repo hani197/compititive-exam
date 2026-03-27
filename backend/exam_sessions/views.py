@@ -79,16 +79,22 @@ class ExamSessionViewSet(viewsets.ModelViewSet):
             if question.question_type == 'mcq':
                 if not selected:
                     unattempted_count += 1
-                elif selected == question.correct_answer.upper():
-                    is_correct = True
-                    q_marks = question.marks
-                    correct_count += 1
-                    chapter_analysis[ckey]['correct'] += 1
                 else:
-                    is_correct = False
-                    q_marks = -question.negative_marks
-                    wrong_count += 1
-                    chapter_analysis[ckey]['wrong'] += 1
+                    # Clean the stored correct answer to extract 'A', 'B', 'C', or 'D'
+                    db_correct = question.correct_answer.strip().upper()
+                    if db_correct.startswith('OPTION_'):
+                        db_correct = db_correct.replace('OPTION_', '')
+                    
+                    if selected == db_correct:
+                        is_correct = True
+                        q_marks = question.marks
+                        correct_count += 1
+                        chapter_analysis[ckey]['correct'] += 1
+                    else:
+                        is_correct = False
+                        q_marks = -question.negative_marks
+                        wrong_count += 1
+                        chapter_analysis[ckey]['wrong'] += 1
             else:
                 if not answer_text:
                     unattempted_count += 1
@@ -133,23 +139,33 @@ class ExamSessionViewSet(viewsets.ModelViewSet):
         weak = [k for k, v in chapter_analysis.items() if v['total'] > 0 and (v['correct'] / v['total']) < 0.4]
         strong = [k for k, v in chapter_analysis.items() if v['total'] > 0 and (v['correct'] / v['total']) >= 0.7]
 
-        ai_feedback = generate_performance_analysis(
-            student_name=request.user.get_full_name() or request.user.username,
-            exam_type=session.paper.exam_type.name,
-            subject=session.paper.subject.name,
-            chapter_analysis=chapter_analysis,
-            percentage=percentage
-        )
+        try:
+            ai_feedback = generate_performance_analysis(
+                student_name=request.user.get_full_name() or request.user.username,
+                exam_type=session.paper.exam_type.name,
+                subject=session.paper.subject.name if session.paper.subject else "Multiple Subjects",
+                chapter_analysis=chapter_analysis,
+                percentage=percentage
+            )
+        except Exception as ai_err:
+            print(f"AI Analysis Error: {ai_err}")
+            ai_feedback = "AI analysis currently unavailable."
 
-        ExamResult.objects.create(
-            session=session, student=request.user,
-            total_marks=total_marks, obtained_marks=obtained_marks,
-            percentage=percentage, correct_count=correct_count,
-            wrong_count=wrong_count, unattempted_count=unattempted_count,
-            ai_overall_feedback=ai_feedback, chapter_analysis=chapter_analysis,
-            weak_chapters=weak, strong_chapters=strong, recommendations=ai_feedback,
-            analysis_confirmed=False,
-        )
+        try:
+            ExamResult.objects.create(
+                session=session, student=request.user,
+                total_marks=total_marks, obtained_marks=obtained_marks,
+                percentage=percentage, correct_count=correct_count,
+                wrong_count=wrong_count, unattempted_count=unattempted_count,
+                ai_overall_feedback=ai_feedback, chapter_analysis=chapter_analysis,
+                weak_chapters=weak, strong_chapters=strong, recommendations=ai_feedback,
+                analysis_confirmed=False,
+            )
+        except Exception as db_err:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"Result DB Error: {error_details}")
+            return Response({'error': 'Failed to save results', 'details': error_details}, status=500)
 
         session.status = 'evaluated'
         session.submitted_at = timezone.now()

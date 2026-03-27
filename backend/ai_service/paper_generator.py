@@ -8,26 +8,40 @@ import os
 
 # Configure Gemini
 genai.configure(api_key=settings.GEMINI_API_KEY)
-model = genai.GenerativeModel('gemma-3-4b-it')
+model = genai.GenerativeModel('gemini-flash-latest')
 
 def clean_json_string(text):
     """Deep clean JSON string for common LLM errors."""
+    if not text:
+        return "{}"
+        
     # 1. Remove markdown formatting
     text = re.sub(r'```(?:json)?\s*', '', text)
     text = re.sub(r'\s*```', '', text)
     
-    # 2. Extract content between first { and last }
-    start = text.find('{')
-    end = text.rfind('}')
+    # 2. Extract content between first { or [ and last } or ]
+    start_brace = text.find('{')
+    start_bracket = text.find('[')
+    
+    if start_brace == -1 and start_bracket == -1:
+        return text.strip()
+        
+    start = start_brace if (start_brace != -1 and (start_bracket == -1 or start_brace < start_bracket)) else start_bracket
+    
+    end_brace = text.rfind('}')
+    end_bracket = text.rfind(']')
+    end = end_brace if end_brace > end_bracket else end_bracket
+    
     if start != -1 and end != -1:
         text = text[start:end+1]
     
-    # 3. Fix unescaped newlines within JSON strings (common in gemma)
-    # This regex looks for newlines that are NOT preceded by a comma or bracket (simplified)
-    # Actually, a better way is to replace newlines inside double quotes
-    def replace_newlines(match):
-        return match.group(0).replace('\n', '\\n')
-    text = re.sub(r'"[^"]*"', replace_newlines, text, flags=re.DOTALL)
+    # 3. Fix unescaped control characters
+    # Replace actual newlines inside strings with \n
+    def replace_unescaped(match):
+        content = match.group(0)
+        return content.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+    
+    text = re.sub(r'"[^"]*"', replace_unescaped, text, flags=re.DOTALL)
 
     # 4. Remove trailing commas
     text = re.sub(r',\s*([\]}])', r'\1', text)
@@ -38,7 +52,8 @@ def extract_text_from_pdf(file_path):
     try:
         reader = PdfReader(file_path)
         text = ""
-        for i in range(min(5, len(reader.pages))):
+        # Read more pages if possible to get better question bank
+        for i in range(min(15, len(reader.pages))):
             text += reader.pages[i].extract_text() + "\n"
         return text
     except Exception as e:
@@ -47,17 +62,33 @@ def extract_text_from_pdf(file_path):
 
 def generate_exam_paper(exam_type: str, subject: str, chapters: list[str], 
                          total_questions: int = 10, difficulty: str = 'mixed',
+                         mode: str = 'ai_generated',
                          reference_papers: list[str] = None) -> dict:
+    print(f"DEBUG: Calling AI for {exam_type} - {subject} (Mode: {mode})")
     chapter_list = ", ".join(chapters)
     
     source_context = ""
     if reference_papers:
-        # Heavily truncate reference to keep Gemini focused
-        combined_ref = "\n".join([p[:1500] for p in reference_papers])
-        source_context = f"ACT AS A QUESTION EXTRACTOR. USE THIS TEXT:\n{combined_ref}\n\n"
+        # Heavily truncate reference to keep Gemini focused, but allow more if extracting
+        limit = 10000 if mode == 'from_pdf' else 1500
+        combined_ref = "\n".join([p[:limit] for p in reference_papers])
+        
+        if mode == 'from_pdf':
+            source_context = f"""ACT AS A QUESTION EXTRACTOR. 
+YOUR PRIMARY GOAL: Find the 'EXERCISE' or 'PRACTICE QUESTIONS' section in the text below and extract exactly {total_questions} questions from it.
+IF NO EXERCISE SECTION EXISTS: Create {total_questions} questions based strictly on the factual content of the text.
+TEXT TO USE:
+{combined_ref}
+\n\n"""
+        else:
+            source_context = f"ACT AS A QUESTION GENERATOR. USE THIS TEXT AS INSPIRATION AND STYLE REFERENCE:\n{combined_ref}\n\n"
+
+    task_description = f"Generate {total_questions} MCQ questions"
+    if mode == 'from_pdf' and reference_papers:
+        task_description = f"Extract exactly {total_questions} real MCQ questions from the provided text"
 
     prompt = f"""{source_context}
-Task: Generate {total_questions} MCQ questions for Indian exam '{exam_type}', Subject: '{subject}', Chapters: {chapter_list}.
+Task: {task_description} for Indian exam '{exam_type}', Subject: '{subject}', Chapters: {chapter_list}.
 Difficulty: {difficulty}
 
 Strict JSON output format:
@@ -93,10 +124,16 @@ CRITICAL:
         cleaned = clean_json_string(raw)
         return json.loads(cleaned)
     except Exception as e:
-        print(f"DEBUG: Raw response was saved to {log_path}")
+        # Define log_path if it doesn't exist yet
+        try:
+            log_path = os.path.join(settings.BASE_DIR, "ai_debug.log")
+        except:
+            log_path = "ai_debug.log"
+            
+        print(f"DEBUG: Error occurred during AI generation. Exception: {e}")
         # If it failed, try one more time with a much simpler request
         if "total_questions" in locals() and total_questions > 5:
-             return generate_exam_paper(exam_type, subject, chapters, 5, difficulty, reference_papers)
+             return generate_exam_paper(exam_type, subject, chapters, 5, difficulty, mode, reference_papers)
         raise
 
 def evaluate_descriptive_answer(question: str, correct_answer: str, student_answer: str, marks: float) -> dict:

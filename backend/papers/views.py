@@ -10,9 +10,13 @@ from .serializers import (GeneratedPaperSerializer, GeneratePaperInputSerializer
 from ai_service.paper_generator import generate_exam_paper, extract_text_from_pdf
 
 
-class PaperViewSet(viewsets.ReadOnlyModelViewSet):
+class PaperViewSet(viewsets.ModelViewSet):
     serializer_class = GeneratedPaperSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['destroy', 'update', 'partial_update']:
+            return [IsAdmin()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         user = self.request.user
@@ -29,7 +33,11 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
         data = serializer.validated_data
 
         exam_type = ExamType.objects.get(id=data['exam_type_id'])
-        subject = Subject.objects.get(id=data['subject_id'])
+        
+        subject = None
+        if data['subject_id'] != 'all' and str(data['subject_id']).isdigit():
+            subject = Subject.objects.get(id=data['subject_id'])
+            
         chapters = Chapter.objects.filter(id__in=data['chapter_ids'])
         chapter_names = list(chapters.values_list('name', flat=True))
 
@@ -42,7 +50,7 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
                 if text:
                     reference_texts.append(text)
 
-        title = data.get('title') or f"{exam_type.code} - {subject.name} Paper"
+        title = data.get('title') or f"{exam_type.code} - {subject.name if subject else 'Comprehensive'} Paper"
         paper = GeneratedPaper.objects.create(
             exam_type=exam_type, subject=subject, title=title,
             total_questions=data['total_questions'],
@@ -54,30 +62,41 @@ class PaperViewSet(viewsets.ReadOnlyModelViewSet):
 
         try:
             result = generate_exam_paper(
-                exam_type=exam_type.name, subject=subject.name,
+                exam_type=exam_type.name, subject=subject.name if subject else "General/All Subjects",
                 chapters=chapter_names, total_questions=data['total_questions'],
                 difficulty=data['difficulty'],
+                mode=data.get('mode', 'ai_generated'),
                 reference_papers=reference_texts if reference_texts else None
             )
+            
+            if not result or 'questions' not in result:
+                raise ValueError("AI response did not contain 'questions' key.")
+
             for q in result.get('questions', []):
-                chapter = chapters.filter(name=q.get('chapter', '')).first() or chapters.first()
+                # Ensure chapter exists
+                q_chapter_name = q.get('chapter', '')
+                chapter = chapters.filter(name__icontains=q_chapter_name).first() or chapters.first()
+                
                 Question.objects.create(
                     paper=paper, chapter=chapter,
-                    question_number=q['question_number'],
+                    question_number=q.get('question_number', 1),
                     question_type=q.get('question_type', 'mcq'),
-                    question_text=q['question_text'],
+                    question_text=q.get('question_text', 'Missing text'),
                     option_a=q.get('option_a', ''), option_b=q.get('option_b', ''),
                     option_c=q.get('option_c', ''), option_d=q.get('option_d', ''),
-                    correct_answer=q['correct_answer'],
+                    correct_answer=q.get('correct_answer', 'A'),
                     explanation=q.get('explanation', ''),
                     marks=q.get('marks', 1.0), negative_marks=q.get('negative_marks', 0.0),
                 )
             paper.status = 'ready'
             paper.save()
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"GENERATION ERROR:\n{error_details}")
             paper.status = 'failed'
             paper.save()
-            return Response({'error': f'Generation failed: {str(e)}'}, status=500)
+            return Response({'error': f'Generation failed: {str(e)}', 'details': error_details}, status=500)
 
         return Response(GeneratedPaperSerializer(paper).data, status=status.HTTP_201_CREATED)
 

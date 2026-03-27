@@ -24,8 +24,10 @@ function ExamSession() {
     if (!sessionId) return;
     api.get('/sessions/' + sessionId + '/').then(res => {
       setSession(res.data);
+      const qCount = res.data.paper_detail?.questions?.length || 0;
       setQuestions(res.data.paper_detail?.questions || []);
-      setTimeLeft(res.data.paper_detail?.duration_minutes * 60);
+      // 60 seconds per question
+      setTimeLeft(qCount * 60);
     });
   }, [sessionId]);
 

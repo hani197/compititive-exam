@@ -22,6 +22,8 @@ import RegisterUserPage from './pages/admin/RegisterUser';
 import CoachingCentresPage from './pages/admin/CoachingCentres';
 import AssignmentsPage from './pages/admin/Assignments';
 import OldPapersPage from './pages/admin/OldPapers';
+import GeneratedPapersPage from './pages/admin/GeneratedPapers';
+import SyllabusManagerPage from './pages/admin/SyllabusManager';
 
 import { withAuth, withAdmin } from './components/withAuth';
 
@@ -39,6 +41,8 @@ const AdminRegister = withAdmin(RegisterUserPage);
 const AdminCentres = withAdmin(CoachingCentresPage);
 const AdminAssignments = withAdmin(AssignmentsPage);
 const AdminOldPapers = withAdmin(OldPapersPage);
+const AdminGenerated = withAdmin(GeneratedPapersPage);
+const AdminSyllabus = withAdmin(SyllabusManagerPage);
 
 function Layout() {
   return (
@@ -79,6 +83,8 @@ function App() {
               <Route path="admin/coaching-centres" element={<AdminCentres />} />
               <Route path="admin/assignments" element={<AdminAssignments />} />
               <Route path="admin/old-papers" element={<AdminOldPapers />} />
+              <Route path="admin/generated-papers" element={<AdminGenerated />} />
+              <Route path="admin/syllabus" element={<AdminSyllabus />} />
             </Route>
 
             {/* Fallback */}

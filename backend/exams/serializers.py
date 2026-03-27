@@ -13,7 +13,7 @@ class ChapterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Chapter
-        fields = ['id', 'name', 'description', 'order', 'topics']
+        fields = ['id', 'subject', 'name', 'description', 'order', 'topics']
 
 
 class SubjectSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ['id', 'name', 'code', 'description', 'order', 'chapters']
+        fields = ['id', 'exam_type', 'name', 'code', 'description', 'order', 'chapters']
 
 
 class ExamTypeSerializer(serializers.ModelSerializer):

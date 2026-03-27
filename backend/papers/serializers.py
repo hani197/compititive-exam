@@ -7,7 +7,19 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'question_number', 'question_type', 'question_text',
-                  'option_a', 'option_b', 'option_c', 'option_d', 'marks', 'negative_marks']
+                  'option_a', 'option_b', 'option_c', 'option_d', 'marks', 'negative_marks',
+                  'correct_answer', 'explanation']
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get('request')
+        user = request.user if request else None
+        
+        # Hide answers from students
+        if user and user.role == 'student':
+            fields.pop('correct_answer', None)
+            fields.pop('explanation', None)
+        return fields
 
 
 class GeneratedPaperSerializer(serializers.ModelSerializer):
@@ -25,17 +37,18 @@ class GeneratedPaperSerializer(serializers.ModelSerializer):
         return obj.exam_type.name
 
     def get_subject_name(self, obj):
-        return obj.subject.name
+        return obj.subject.name if obj.subject else "Multiple Subjects"
 
 
 class GeneratePaperInputSerializer(serializers.Serializer):
     title = serializers.CharField(required=False, default='')
     exam_type_id = serializers.IntegerField()
-    subject_id = serializers.IntegerField()
+    subject_id = serializers.CharField() # Changed to CharField to support 'all'
     chapter_ids = serializers.ListField(child=serializers.IntegerField(), min_length=1)
     total_questions = serializers.IntegerField(default=30, min_value=5, max_value=100)
     difficulty = serializers.ChoiceField(choices=['easy', 'medium', 'hard', 'mixed'], default='mixed')
     duration_minutes = serializers.IntegerField(default=60, min_value=5, max_value=180)
+    mode = serializers.ChoiceField(choices=['ai_generated', 'from_pdf'], default='ai_generated')
     old_paper_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list)
 
 
@@ -61,3 +74,11 @@ class PreviousYearPaperSerializer(serializers.ModelSerializer):
         model = PreviousYearPaper
         fields = ['id', 'exam_type', 'exam_type_name', 'exam_type_code', 'title', 'year', 'file', 'description', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
+
+    def validate_file(self, value):
+        # Read first few bytes to check for PDF magic number
+        header = value.read(4)
+        value.seek(0) # Reset file pointer
+        if header != b'%PDF':
+            raise serializers.ValidationError("The uploaded file is not a valid PDF document.")
+        return value

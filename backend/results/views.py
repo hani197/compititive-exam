@@ -10,19 +10,19 @@ from .serializers import ExamResultSerializer
 class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ExamResultSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_fields = ['session']
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'admin' or user.is_staff:
-            return ExamResult.objects.all().select_related(
-                'session__paper__exam_type', 'session__paper__subject', 'student'
-            ).order_by('-evaluated_at')
-        # Students only see confirmed results
-        return ExamResult.objects.filter(
-            student=user, analysis_confirmed=True
-        ).select_related(
-            'session__paper__exam_type', 'session__paper__subject'
+        queryset = ExamResult.objects.all().select_related(
+            'session__paper__exam_type', 'session__paper__subject', 'student'
         ).order_by('-evaluated_at')
+
+        if user.role == 'admin' or user.is_staff:
+            return queryset
+        
+        # For students: Only confirmed results
+        return queryset.filter(student=user, analysis_confirmed=True)
 
     @action(detail=True, methods=['post'], url_path='confirm', permission_classes=[IsAdmin])
     def confirm(self, request, pk=None):
@@ -68,7 +68,7 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
                 'old_papers': PreviousYearPaperSerializer(old_papers, many=True).data
             })
 
-        results = ExamResult.objects.filter(student=user, analysis_confirmed=True)
+        results = ExamResult.objects.filter(student=user)
         total = results.count()
         avg = sum(r.percentage for r in results) / total if total else 0
         best = max((r.percentage for r in results), default=0)
@@ -76,7 +76,7 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
             'total_exams_taken': total,
             'average_percentage': round(avg, 2),
             'best_score': round(best, 2),
-            'recent_results': ExamResultSerializer(results[:5], many=True).data,
+            'recent_results': ExamResultSerializer(results.order_by('-evaluated_at')[:5], many=True).data,
         })
 
     @action(detail=False, methods=['get'], url_path='pending', permission_classes=[IsAdmin])
@@ -85,3 +85,24 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
             'student', 'session__paper__exam_type', 'session__paper__subject'
         ).order_by('-evaluated_at')
         return Response(ExamResultSerializer(results, many=True).data)
+
+    @action(detail=True, methods=['post'], url_path='confirm', permission_classes=[IsAdmin])
+    def confirm(self, request, pk=None):
+        result = self.get_object()
+        result.analysis_confirmed = True
+        result.confirmed_by = request.user
+        result.confirmed_at = timezone.now()
+        result.save()
+        
+        # Update session status if needed
+        session = result.session
+        if session.status != 'evaluated':
+            session.status = 'evaluated'
+            session.save()
+            
+        return Response({'message': 'Result confirmed and released to student.'})
+
+    @action(detail=True, methods=['post'], url_path='confirm_analysis', permission_classes=[IsAdmin])
+    def confirm_analysis(self, request, pk=None):
+        """Frontend calls this endpoint to confirm analysis."""
+        return self.confirm(request, pk)

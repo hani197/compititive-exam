@@ -3,7 +3,7 @@ import {
   Box, Typography, Paper, TextField, Button, Alert, MenuItem,
   Select, InputLabel, FormControl, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, IconButton, Tooltip, CircularProgress,
-  Avatar, Chip, Grid2 as Grid
+  Avatar, Chip, Stack
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -86,7 +86,6 @@ function OldPapers() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1100, mx: 'auto' }}>
-      {/* Header */}
       <Box sx={{
         background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
         borderRadius: 3, p: 3, mb: 4, color: '#fff'
@@ -97,58 +96,60 @@ function OldPapers() {
         <Typography variant="body2" sx={{ opacity: 0.8 }}>Upload and manage old exam question papers (PDF)</Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
         {/* Upload Form */}
-        <Grid item xs={12} md={4}>
+        <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 350px' } }}>
           <Paper sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" fontWeight={700} mb={3}>Upload Paper</Typography>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
             <form onSubmit={handleUpload}>
-              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                <InputLabel id="exam-type-select-label">Exam Type</InputLabel>
-                <Select
-                  labelId="exam-type-select-label"
-                  value={form.exam_type}
-                  label="Exam Type"
-                  onChange={e => setForm({ ...form, exam_type: e.target.value })}
-                  required
+              <Stack spacing={2}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="exam-type-select-label">Exam Type</InputLabel>
+                  <Select
+                    labelId="exam-type-select-label"
+                    value={form.exam_type}
+                    label="Exam Type"
+                    onChange={e => setForm({ ...form, exam_type: e.target.value })}
+                    required
+                  >
+                    {(examTypes || []).map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+
+                <TextField fullWidth label="Paper Title" size="small" required
+                  value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                
+                <TextField fullWidth label="Year" type="number" size="small" required
+                  value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} />
+
+                <TextField fullWidth label="Description (Optional)" multiline rows={2} size="small"
+                  value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+
+                <Button
+                  component="label"
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ py: 1 }}
                 >
-                  {(examTypes || []).map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
-                </Select>
-              </FormControl>
+                  {file ? file.name : 'Choose PDF File'}
+                  <input type="file" hidden accept="application/pdf" 
+                    onChange={e => setFile(e.target.files[0])} />
+                </Button>
 
-              <TextField fullWidth label="Paper Title" size="small" sx={{ mb: 2 }} required
-                value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
-              
-              <TextField fullWidth label="Year" type="number" size="small" sx={{ mb: 2 }} required
-                value={form.year} onChange={e => setForm({ ...form, year: e.target.value })} />
-
-              <TextField fullWidth label="Description (Optional)" multiline rows={2} size="small" sx={{ mb: 3 }}
-                value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-
-              <Button
-                component="label"
-                fullWidth
-                variant="outlined"
-                startIcon={<CloudUploadIcon />}
-                sx={{ mb: 3, py: 1 }}
-              >
-                {file ? file.name : 'Choose PDF File'}
-                <input type="file" hidden accept="application/pdf" 
-                  onChange={e => setFile(e.target.files[0])} />
-              </Button>
-
-              <Button fullWidth variant="contained" type="submit" sx={{ py: 1.2 }}>
-                Upload Now
-              </Button>
+                <Button fullWidth variant="contained" type="submit" sx={{ py: 1.2 }}>
+                  Upload Now
+                </Button>
+              </Stack>
             </form>
           </Paper>
-        </Grid>
+        </Box>
 
         {/* Papers List */}
-        <Grid item xs={12} md={8}>
+        <Box sx={{ flex: 1 }}>
           <TableContainer component={Paper} sx={{ borderRadius: 3, overflow: 'hidden' }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#f8fafc' }}>
@@ -199,8 +200,8 @@ function OldPapers() {
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 }

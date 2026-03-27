@@ -25,9 +25,8 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const u = await login(form.username, form.password);
-      if (u.role === 'admin' || u.is_staff) navigate('/admin/requests');
-      else navigate('/dashboard');
+      await login(form.username, form.password);
+      navigate('/dashboard');
     } catch (err) {
       setError('Invalid username or password.');
     } finally {

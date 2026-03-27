@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from exams.models import ExamType, Subject, Chapter
 
 
@@ -17,7 +18,7 @@ class GeneratedPaper(models.Model):
     ]
 
     exam_type = models.ForeignKey(ExamType, on_delete=models.CASCADE, related_name='papers')
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='papers')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=True, blank=True, related_name='papers')
     chapters = models.ManyToManyField(Chapter, related_name='papers')
     title = models.CharField(max_length=200)
     total_questions = models.PositiveIntegerField(default=30)
@@ -30,7 +31,8 @@ class GeneratedPaper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.exam_type.code} - {self.subject.name} - {self.title}"
+        sub_name = self.subject.name if self.subject else "Comprehensive"
+        return f"{self.exam_type.code} - {sub_name} - {self.title}"
 
 
 class Question(models.Model):
@@ -80,7 +82,7 @@ class PreviousYearPaper(models.Model):
     exam_type = models.ForeignKey(ExamType, on_delete=models.CASCADE, related_name='old_papers')
     title = models.CharField(max_length=255)
     year = models.PositiveIntegerField()
-    file = models.FileField(upload_to='old_papers/')
+    file = models.FileField(upload_to='old_papers/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
     description = models.TextField(blank=True)
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='uploaded_old_papers'

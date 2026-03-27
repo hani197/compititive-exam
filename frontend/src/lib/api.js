@@ -14,10 +14,16 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    // Don't refresh if it's the login or refresh request itself that failed
+    const isAuthRequest = original.url.includes('/auth/login/') || original.url.includes('/auth/token/refresh/');
+    
+    if (error.response?.status === 401 && !original._retry && !isAuthRequest) {
       original._retry = true;
       try {
         const refresh = localStorage.getItem('refresh_token');
+        if (!refresh) {
+          throw new Error('No refresh token');
+        }
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/token/refresh/`,
           { refresh }

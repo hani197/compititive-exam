@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, FormControl, InputLabel, Select, MenuItem,
   Button, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Avatar, IconButton, Tooltip, CircularProgress, Grid2 as Grid
+  Avatar, IconButton, Tooltip, CircularProgress, Stack
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,10 +23,6 @@ function Assignments() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -34,16 +30,18 @@ function Assignments() {
         api.get('/auth/students/'),
         api.get('/auth/assignments/')
       ]);
-      const allUsers = userRes.data.results || userRes.data;
+      const allUsers = userRes.data.results || userRes.data || [];
       setStudents(allUsers.filter(u => u.role === 'student'));
       setInstructors(allUsers.filter(u => u.role === 'instructor'));
-      setAssignments(assignRes.data.results || assignRes.data);
+      setAssignments(assignRes.data.results || assignRes.data || []);
     } catch (err) {
       setError('Failed to fetch data.');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => { fetchData(); }, []);
 
   const handleAssign = async (e) => {
     e.preventDefault();
@@ -86,6 +84,7 @@ function Assignments() {
     if (!window.confirm('Remove this assignment?')) return;
     try {
       await api.delete(`/auth/assignments/${id}/`);
+      setSuccess('Assignment removed.');
       fetchData();
     } catch (err) {
       setError('Failed to delete assignment.');
@@ -95,7 +94,7 @@ function Assignments() {
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}><CircularProgress /></Box>;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1000, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: 1100, mx: 'auto' }}>
       <Box sx={{
         background: 'linear-gradient(135deg, #1e0546 0%, #4c1d95 100%)',
         borderRadius: 3, p: 3, mb: 4, color: '#fff'
@@ -104,9 +103,9 @@ function Assignments() {
         <Typography variant="body2" sx={{ opacity: 0.8 }}>Assign personal mentors to your students</Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
         {/* Assignment Form */}
-        <Grid item xs={12} md={4}>
+        <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 350px' } }}>
           <Paper sx={{ p: 3, borderRadius: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" fontWeight={700}>{editingId ? 'Edit Assignment' : 'New Assignment'}</Typography>
@@ -116,61 +115,64 @@ function Assignments() {
                 </IconButton>
               )}
             </Box>
+            
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
             
             <form onSubmit={handleAssign}>
-              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                <InputLabel>Select Student</InputLabel>
-                <Select
-                  value={form.student}
-                  label="Select Student"
-                  onChange={e => setForm({ ...form, student: e.target.value })}
-                >
-                  {students.map(s => (
-                    <MenuItem key={s.id} value={s.id}>{s.first_name} {s.last_name} (@{s.username})</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Stack spacing={2.5}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Select Student</InputLabel>
+                  <Select
+                    value={form.student}
+                    label="Select Student"
+                    onChange={e => setForm({ ...form, student: e.target.value })}
+                  >
+                    {students.map(s => (
+                      <MenuItem key={s.id} value={s.id}>{s.first_name} {s.last_name} (@{s.username})</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <FormControl fullWidth size="small" sx={{ mb: 3 }}>
-                <InputLabel>Select Instructor</InputLabel>
-                <Select
-                  value={form.instructor}
-                  label="Select Instructor"
-                  onChange={e => setForm({ ...form, instructor: e.target.value })}
-                >
-                  {instructors.map(i => (
-                    <MenuItem key={i.id} value={i.id}>{i.first_name} {i.last_name} (@{i.username})</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Select Instructor</InputLabel>
+                  <Select
+                    value={form.instructor}
+                    label="Select Instructor"
+                    onChange={e => setForm({ ...form, instructor: e.target.value })}
+                  >
+                    {instructors.map(i => (
+                      <MenuItem key={i.id} value={i.id}>{i.first_name} {i.last_name} (@{i.username})</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <Button 
-                fullWidth variant="contained" type="submit" 
-                startIcon={editingId ? <EditIcon /> : <PersonAddIcon />}
-                color={editingId ? "warning" : "primary"}
-                sx={{ py: 1.2, borderRadius: 2 }}
-              >
-                {editingId ? 'Update Assignment' : 'Assign Now'}
-              </Button>
-              {editingId && (
-                <Button fullWidth variant="text" color="inherit" onClick={cancelEdit} sx={{ mt: 1 }}>
-                  Cancel
+                <Button 
+                  fullWidth variant="contained" type="submit" 
+                  startIcon={editingId ? <EditIcon /> : <PersonAddIcon />}
+                  color={editingId ? "warning" : "primary"}
+                  sx={{ py: 1.2, borderRadius: 2 }}
+                >
+                  {editingId ? 'Update Assignment' : 'Assign Now'}
                 </Button>
-              )}
+                {editingId && (
+                  <Button fullWidth variant="text" color="inherit" onClick={cancelEdit}>
+                    Cancel
+                  </Button>
+                )}
+              </Stack>
             </form>
           </Paper>
-        </Grid>
+        </Box>
 
         {/* Assignments Table */}
-        <Grid item xs={12} md={8}>
+        <Box sx={{ flex: 1 }}>
           <TableContainer component={Paper} sx={{ borderRadius: 3, overflow: 'hidden' }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#f8fafc' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>Student</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Assigned Instructor</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Instructor</TableCell>
                   <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
@@ -179,59 +181,38 @@ function Assignments() {
                   <TableRow key={row.id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#ede9fe', color: '#5b21b6', fontSize: 12 }}>
-                          {row.student_detail.first_name?.[0] || 'S'}
-                        </Avatar>
+                        <Avatar sx={{ width: 32, height: 32, fontSize: 12 }}>{row.student_detail?.username?.[0] || 'S'}</Avatar>
                         <Box>
-                          <Typography variant="body2" fontWeight={700}>
-                            {row.student_detail.first_name} {row.student_detail.last_name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">@{row.student_detail.username}</Typography>
+                          <Typography variant="body2" fontWeight={700}>{row.student_detail?.first_name} {row.student_detail?.last_name}</Typography>
+                          <Typography variant="caption" color="text.secondary">@{row.student_detail?.username}</Typography>
                         </Box>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#fdf2f8', color: '#9d174d', fontSize: 12 }}>
-                          {row.instructor_detail.first_name?.[0] || 'I'}
-                        </Avatar>
+                        <Avatar sx={{ width: 32, height: 32, fontSize: 12 }}>{row.instructor_detail?.username?.[0] || 'I'}</Avatar>
                         <Box>
-                          <Typography variant="body2" fontWeight={700}>
-                            {row.instructor_detail.first_name} {row.instructor_detail.last_name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">{row.instructor_detail.faculty_field || 'Faculty'}</Typography>
+                          <Typography variant="body2" fontWeight={700}>{row.instructor_detail?.first_name} {row.instructor_detail?.last_name}</Typography>
+                          <Typography variant="caption" color="text.secondary">{row.instructor_detail?.faculty_field || 'Faculty'}</Typography>
                         </Box>
                       </Box>
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                        <Tooltip title="Edit Assignment">
-                          <IconButton color="primary" onClick={() => handleEdit(row)} size="small">
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Remove Assignment">
-                          <IconButton color="error" onClick={() => handleDelete(row.id)} size="small">
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <IconButton size="small" color="primary" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
+                        <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}><DeleteIcon fontSize="small" /></IconButton>
                       </Box>
                     </TableCell>
                   </TableRow>
                 ))}
                 {assignments.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3} align="center" sx={{ py: 6 }}>
-                      <PeopleIcon sx={{ fontSize: 40, color: '#e2e8f0', mb: 1 }} />
-                      <Typography color="text.secondary">No assignments found</Typography>
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={3} align="center" sx={{ py: 6 }}><Typography color="text.secondary">No assignments found</Typography></TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 }

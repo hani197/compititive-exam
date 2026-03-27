@@ -1,143 +1,136 @@
 import { useState, useEffect } from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Chip, Button, Dialog, DialogTitle,
-  DialogContent, DialogActions, LinearProgress, CircularProgress, Alert, Avatar, Grid, Card, CardContent
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Chip, Button, Dialog, DialogTitle,
+  DialogContent, DialogActions, LinearProgress, CircularProgress, Alert, Avatar, Stack, Card, CardContent
 } from '@mui/material';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
-function SubmissionsPage() {
+function Submissions() {
   const [results, setResults] = useState([]);
-  const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedResult, setSelectedResult] = useState(null);
   const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState('');
 
-  const fetchResults = () => api.get('/results/').then(r => setResults(r.data.results || r.data)).finally(() => setLoading(false));
+  const fetchResults = async () => {
+    try {
+      const res = await api.get('/results/');
+      setResults(res.data.results || res.data || []);
+    } catch (err) {
+      setError('Failed to fetch submissions.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => { fetchResults(); }, []);
 
   const handleConfirm = async (id) => {
     setConfirming(true);
-    await api.post('/results/' + id + '/confirm/');
-    setSelected(null);
-    fetchResults();
-    setConfirming(false);
+    try {
+      await api.post(`/results/${id}/confirm_analysis/`);
+      fetchResults();
+      setSelectedResult(null);
+    } catch (err) {
+      alert('Confirmation failed.');
+    } finally {
+      setConfirming(false);
+    }
   };
 
-  if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-      <CircularProgress sx={{ color: '#7c3aed' }} />
-    </Box>
-  );
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}><CircularProgress /></Box>;
 
   const pending = results.filter(r => !r.analysis_confirmed).length;
-  const confirmed = results.filter(r => r.analysis_confirmed).length;
-  const chapterData = selected ? Object.values(selected.chapter_analysis || {}) : [];
-  const pctColor = p => p >= 70 ? '#059669' : p >= 40 ? '#d97706' : '#dc2626';
-  const pctMuiColor = p => p >= 70 ? 'success' : p >= 40 ? 'warning' : 'error';
+  const stats = [
+    { label: 'Total Submissions', value: results.length, icon: <AssignmentTurnedInIcon />, color: '#7c3aed' },
+    { label: 'Pending Review', value: pending, icon: <PendingActionsIcon />, color: '#f59e0b' },
+    { label: 'Confirmed', value: results.length - pending, icon: <CheckCircleIcon />, color: '#10b981' },
+  ];
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-      {/* Header */}
-      <Box sx={{
-        background: 'linear-gradient(135deg, #3b0764 0%, #5b21b6 60%, #7c3aed 100%)',
-        borderRadius: 3, p: 3, mb: 3, position: 'relative', overflow: 'hidden',
-      }}>
-        <Box sx={{ position: 'absolute', right: -20, top: -30, width: 150, height: 150, borderRadius: '50%', background: 'rgba(168,85,247,0.3)', filter: 'blur(30px)' }} />
-        <Typography variant="h5" color="#fff" fontWeight={800}>Student Submissions</Typography>
-        <Typography color="rgba(255,255,255,0.65)" mt={0.3} fontSize="0.9rem">
-          Review AI analysis and release results to students
-        </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" fontWeight={800}>Student Submissions</Typography>
+        <Typography variant="body2" color="text.secondary">Review and confirm AI-generated performance analysis</Typography>
       </Box>
 
-      {/* Stat cards */}
-      <Grid container spacing={2.5} mb={3}>
-        {[
-          { label: 'Pending Review', value: pending, grad: 'linear-gradient(135deg, #d97706, #f59e0b)', shadow: 'rgba(217,119,6,0.35)', icon: <HourglassEmptyIcon sx={{ color: '#fff', fontSize: 24 }} /> },
-          { label: 'Confirmed', value: confirmed, grad: 'linear-gradient(135deg, #059669, #10b981)', shadow: 'rgba(5,150,105,0.35)', icon: <CheckCircleIcon sx={{ color: '#fff', fontSize: 24 }} /> },
-          { label: 'Total', value: results.length, grad: 'linear-gradient(135deg, #7c3aed, #a855f7)', shadow: 'rgba(124,58,237,0.35)', icon: <FactCheckIcon sx={{ color: '#fff', fontSize: 24 }} /> },
-        ].map(c => (
-          <Grid item xs={12} sm={4} key={c.label}>
-            <Card sx={{ background: c.grad, boxShadow: `0 8px 32px ${c.shadow}`, border: 'none' }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2.5 }}>
-                <Box sx={{ bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 3, p: 1.5, display: 'flex', backdropFilter: 'blur(10px)' }}>
-                  {c.icon}
-                </Box>
-                <Box>
-                  <Typography variant="h3" fontWeight={900} color="#fff" lineHeight={1}>{c.value}</Typography>
-                  <Typography color="rgba(255,255,255,0.75)" fontWeight={500} fontSize="0.85rem">{c.label}</Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
+        {stats.map(s => (
+          <Card key={s.label} sx={{ flex: '1 1 250px', borderRadius: 3 }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ bgcolor: s.color + '15', color: s.color, p: 1.5, borderRadius: 2, display: 'flex' }}>{s.icon}</Box>
+              <Box>
+                <Typography variant="h4" fontWeight={800}>{s.value}</Typography>
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>{s.label.toUpperCase()}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
 
-      <Paper sx={{ overflow: 'hidden' }}>
+      <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
         <TableContainer>
-          <Table>
-            <TableHead>
+          <Table size="small">
+            <TableHead sx={{ bgcolor: '#f8fafc' }}>
               <TableRow>
-                <TableCell>Student</TableCell>
-                <TableCell>Exam / Subject</TableCell>
-                <TableCell>Score</TableCell>
-                <TableCell>Marks</TableCell>
-                <TableCell>Submitted</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Student</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Exam Paper</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Score</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {results.map(r => {
-                const pct = r.percentage ?? 0;
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 34, height: 34, background: 'linear-gradient(135deg, #7c3aed, #a855f7)', fontSize: 13, fontWeight: 800 }}>
-                          {r.student_name?.[0]?.toUpperCase()}
-                        </Avatar>
-                        <Typography variant="body2" fontWeight={700}>{r.student_name}</Typography>
+              {results.map((row) => (
+                <TableRow key={row.id} hover>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: '#ede9fe', color: '#7c3aed', fontSize: 12 }}>{row.student_name?.[0]}</Avatar>
+                      <Typography variant="body2" fontWeight={600}>{row.student_name}</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>{row.exam_name}</Typography>
+                    <Typography variant="caption" color="text.secondary">{row.subject_name}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ width: 100 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography variant="caption" fontWeight={700}>{row.percentage}%</Typography>
                       </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>{r.exam_name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{r.subject_name}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={pct.toFixed(1) + '%'} size="small" color={pctMuiColor(pct)}
-                        sx={{ fontWeight: 800, minWidth: 62 }} />
-                    </TableCell>
-                    <TableCell><Typography variant="body2" fontWeight={600}>{r.obtained_marks}/{r.total_marks}</Typography></TableCell>
-                    <TableCell><Typography variant="body2" color="text.secondary">{new Date(r.evaluated_at).toLocaleDateString()}</Typography></TableCell>
-                    <TableCell>
-                      {r.analysis_confirmed
-                        ? <Chip label="Confirmed" size="small" sx={{ bgcolor: '#d1fae5', color: '#065f46', fontWeight: 700 }} />
-                        : <Chip label="Pending" size="small" sx={{ bgcolor: '#fff7ed', color: '#c2410c', fontWeight: 700 }} />
-                      }
-                    </TableCell>
-                    <TableCell align="right">
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                        <Button size="small" variant="outlined" onClick={() => setSelected(r)}>View</Button>
-                        {!r.analysis_confirmed && (
-                          <Button size="small" variant="contained" color="success" onClick={() => handleConfirm(r.id)}>
-                            Confirm
-                          </Button>
-                        )}
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      <LinearProgress variant="determinate" value={row.percentage} sx={{ height: 6, borderRadius: 3 }} color={row.percentage >= 60 ? 'success' : 'error'} />
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={row.analysis_confirmed ? 'Confirmed' : 'Pending Review'}
+                      size="small"
+                      color={row.analysis_confirmed ? 'success' : 'warning'}
+                      sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button
+                      size="small"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => setSelectedResult(row)}
+                      variant="outlined"
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
               {results.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
-                    <FactCheckIcon sx={{ fontSize: 52, color: '#c4b5fd', display: 'block', mx: 'auto', mb: 1.5 }} />
-                    <Typography color="text.secondary" fontWeight={600}>No submissions yet</Typography>
+                  <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                    <Typography color="text.secondary">No submissions yet.</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -146,83 +139,43 @@ function SubmissionsPage() {
         </TableContainer>
       </Paper>
 
-      {/* Detail Dialog */}
-      <Dialog open={!!selected} onClose={() => setSelected(null)} maxWidth="md" fullWidth>
-        {selected && (
-          <>
-            <Box sx={{ background: 'linear-gradient(135deg, #3b0764, #7c3aed)', p: 3, borderRadius: '20px 20px 0 0' }}>
-              <Typography variant="h6" color="#fff" fontWeight={800}>{selected.student_name}</Typography>
-              <Typography color="rgba(255,255,255,0.7)">{selected.exam_name} · {selected.subject_name}</Typography>
-            </Box>
-            <DialogContent sx={{ pt: 3 }}>
-              {/* Score overview */}
-              <Grid container spacing={2} mb={3}>
-                {[
-                  { label: 'Score', value: (selected.percentage ?? 0).toFixed(1) + '%', color: pctColor(selected.percentage ?? 0) },
-                  { label: 'Marks', value: `${selected.obtained_marks}/${selected.total_marks}`, color: '#3b0764' },
-                  { label: 'Correct', value: selected.correct_count, color: '#059669' },
-                  { label: 'Wrong', value: selected.wrong_count, color: '#dc2626' },
-                  { label: 'Skipped', value: selected.unattempted_count, color: '#6b21a8' },
-                ].map(item => (
-                  <Grid item xs key={item.label}>
-                    <Box sx={{ textAlign: 'center', background: 'linear-gradient(135deg, #f5f0ff, #ede9fe)', borderRadius: 3, p: 2, border: '1px solid rgba(167,139,250,0.2)' }}>
-                      <Typography variant="h5" fontWeight={800} color={item.color}>{item.value}</Typography>
-                      <Typography variant="caption" color="text.secondary" fontWeight={600}>{item.label}</Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-
-              {chapterData.length > 0 && (
-                <Box mb={3}>
-                  <Typography variant="subtitle1" fontWeight={700} mb={2}>Chapter Analysis</Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {chapterData.map((ch, i) => {
-                      const p = ch.total > 0 ? (ch.correct / ch.total) * 100 : 0;
-                      return (
-                        <Box key={i}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                            <Typography variant="body2" fontWeight={600}>{ch.chapter_name}</Typography>
-                            <Typography variant="body2" fontWeight={700} color={pctColor(p)}>
-                              {ch.correct}/{ch.total} ({p.toFixed(0)}%)
-                            </Typography>
-                          </Box>
-                          <LinearProgress variant="determinate" value={p}
-                            color={pctMuiColor(p)} sx={{ height: 10, borderRadius: 5 }} />
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Box>
+      {selectedResult && (
+        <Dialog open={true} onClose={() => setSelectedResult(null)} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ borderBottom: '1px solid #f1f5f9' }}>
+            Performance Analysis: {selectedResult.student_name}
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            <Stack spacing={3} sx={{ mt: 1 }}>
+              <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2 }}>
+                <Typography variant="subtitle2" fontWeight={700} gutterBottom>AI Summary</Typography>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                  {selectedResult.ai_overall_feedback || selectedResult.ai_analysis || 'No analysis available.'}
+                </Typography>
+              </Box>
+              
+              {!selectedResult.analysis_confirmed && (
+                <Alert severity="info">Review the AI analysis above. Once confirmed, the student can view their detailed results.</Alert>
               )}
-
-              {selected.ai_overall_feedback && (
-                <Box sx={{ background: 'linear-gradient(135deg, #f5f0ff, #ede9fe)', borderRadius: 3, p: 3, border: '1px solid rgba(167,139,250,0.25)' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                    <SmartToyIcon sx={{ color: '#7c3aed', fontSize: 22 }} />
-                    <Typography variant="subtitle2" fontWeight={800} color="#5b21b6">AI Feedback</Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.9 }}>
-                    {selected.ai_overall_feedback}
-                  </Typography>
-                </Box>
-              )}
-            </DialogContent>
-            <DialogActions sx={{ p: 2.5, pt: 0, gap: 1 }}>
-              <Button onClick={() => setSelected(null)} variant="outlined">Close</Button>
-              {!selected.analysis_confirmed && (
-                <Button variant="contained" color="success"
-                  onClick={() => handleConfirm(selected.id)} disabled={confirming}
-                  startIcon={confirming ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <CheckCircleIcon />}>
-                  Confirm & Release
-                </Button>
-              )}
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5, borderTop: '1px solid #f1f5f9' }}>
+            <Button onClick={() => setSelectedResult(null)}>Close</Button>
+            {!selectedResult.analysis_confirmed && (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => handleConfirm(selectedResult.id)}
+                disabled={confirming}
+                startIcon={confirming ? <CircularProgress size={18} /> : <CheckCircleIcon />}
+              >
+                Confirm & Release Result
+              </Button>
+            )}
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   );
 }
 
-export default withAdmin(SubmissionsPage);
+export default withAdmin(Submissions);
