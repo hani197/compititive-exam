@@ -32,6 +32,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     exam_type_name = serializers.CharField(source='exam_type.name', read_only=True)
+    coaching_centre_name = serializers.CharField(source='coaching_centre.name', read_only=True)
 
     class Meta:
         model = User
@@ -41,8 +42,9 @@ class UserSerializer(serializers.ModelSerializer):
                   'parent_name', 'parent_phone', 'age', 'tenth_percentage', 'tenth_year',
                   'intermediate_percentage', 'intermediate_year', 'degree_type', 
                   'degree_percentage', 'degree_year',
-                  'experience_years', 'faculty_field', 'work_history', 'exam_type', 'exam_type_name']
-        read_only_fields = ['id', 'created_at', 'is_staff']
+                  'experience_years', 'faculty_field', 'work_history', 'exam_type', 
+                  'exam_type_name', 'coaching_centre', 'coaching_centre_name']
+        read_only_fields = ['id', 'created_at', 'is_staff', 'exam_type_name', 'coaching_centre_name']
 
 
 class RegistrationRequestSerializer(serializers.ModelSerializer):
