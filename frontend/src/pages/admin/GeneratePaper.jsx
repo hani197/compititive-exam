@@ -44,9 +44,9 @@ function GeneratePaperPage() {
   const [expanded, setExpanded] = useState('panel1');
 
   useEffect(() => {
-    api.get('/exam-types/').then(r => setExamTypes(r.data.results || r.data || []));
-    api.get('/auth/students/').then(r => setStudents(r.data.results || r.data || []));
-    api.get('/papers/old-papers/').then(r => setOldPapers(r.data.results || r.data || []));
+    api.get('exam-types/').then(r => setExamTypes(r.data.results || r.data || []));
+    api.get('auth/students/').then(r => setStudents(r.data.results || r.data || []));
+    api.get('papers/old-papers/').then(r => setOldPapers(r.data.results || r.data || []));
   }, []);
 
   // Fetch Subject->Chapter hierarchy when Exam Type changes
@@ -60,8 +60,8 @@ function GeneratePaperPage() {
       setFetchingExamData(true);
       try {
         const [subRes, chapRes] = await Promise.all([
-          api.get('/subjects/?exam_type=' + form.exam_type_id),
-          api.get('/chapters/?exam_type=' + form.exam_type_id)
+          api.get('subjects/?exam_type=' + form.exam_type_id),
+          api.get('chapters/?exam_type=' + form.exam_type_id)
         ]);
         const subs = subRes.data.results || subRes.data || [];
         const allChaps = chapRes.data.results || chapRes.data || [];
@@ -114,7 +114,7 @@ function GeneratePaperPage() {
     try {
       // Backend now expects subject_id='all' if multiple subjects covered
       const submission = { ...form, subject_id: 'all' };
-      const res = await api.post('/papers/generate/', submission);
+      const res = await api.post('papers/generate/', submission);
       setGeneratedPaper(res.data);
       setExpanded('panel3');
     } catch (err) {
@@ -127,7 +127,7 @@ function GeneratePaperPage() {
     if (selectedStudents.length === 0) { setError('Select at least one student.'); return; }
     setAssigning(true); setError('');
     try {
-      await api.post('/papers/' + generatedPaper.id + '/assign/', {
+      await api.post('papers/' + generatedPaper.id + '/assign/', {
         student_ids: selectedStudents.map(s => s.id),
       });
       setSuccess('Paper assigned successfully!');

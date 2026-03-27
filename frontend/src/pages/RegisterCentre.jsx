@@ -38,9 +38,10 @@ export default function RegisterCentrePage() {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      await api.post('/auth/request-access/', form);
+      await api.post('auth/request-access/', form);
       setSuccess(true);
     } catch (err) {
+
       const d = err.response?.data;
       setError(d ? JSON.stringify(d) : 'Submission failed. Please try again.');
     } finally { setLoading(false); }
