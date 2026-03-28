@@ -5,12 +5,10 @@ from PyPDF2 import PdfReader
 import io
 import re
 import os
-import time
 
 # Configure Gemini
 api_key = getattr(settings, 'GEMINI_API_KEY', None)
 if not api_key:
-    # Try environment variable directly as fallback
     api_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
 
 if api_key:
@@ -19,29 +17,24 @@ if api_key:
 else:
     print("CRITICAL: No GEMINI_API_KEY found in settings or environment.")
 
-# List of models to try in order of preference
-# Including gemma-3-4b-it as it was confirmed working in gemini.js
+# Confirmed models available for this account
 MODELS_TO_TRY = [
-    'gemini-2.0-flash-lite',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemma-3-4b-it'
+    'gemini-2.0-flash-lite',      # Highest quota limits
+    'gemini-flash-lite-latest',   # 1.5 Lite fallback
+    'gemini-2.0-flash',           # Standard Flash
+    'gemma-3-4b-it'               # Confirmed working in gemini.js
 ]
 
 def clean_json_string(text):
     """Deep clean JSON string for common LLM errors."""
     if not text:
         return "{}"
-    # Remove markdown formatting
     text = re.sub(r'```(?:json)?\s*', '', text)
     text = re.sub(r'\s*```', '', text)
-    
-    # Extract content between first { or [ and last } or ]
     start = text.find('{')
     end = text.rfind('}')
     if start != -1 and end != -1:
         text = text[start:end+1]
-        
     return text.strip()
 
 def extract_text_from_pdf(file_path):
@@ -62,22 +55,19 @@ def generate_exam_paper(exam_type: str, subject: str, chapters: list[str],
                          model_index: int = 0) -> dict:
     
     if model_index >= len(MODELS_TO_TRY):
-        raise Exception("All available AI models failed or exceeded quota. Please try again in a few minutes.")
+        raise Exception("All AI models are currently busy or at quota limit. Please wait 60 seconds and try again.")
 
     model_name = MODELS_TO_TRY[model_index]
-    print(f"DEBUG: Calling AI model {model_name} for {exam_type} - {subject}")
+    print(f"DEBUG: Attempting AI generation with {model_name}...")
     
     model = genai.GenerativeModel(model_name)
     chapter_list = ", ".join(chapters)
     
     source_context = ""
     if reference_papers:
-        limit = 10000 if mode == 'from_pdf' else 1500
+        limit = 8000 # Truncate slightly more to stay under token limits
         combined_ref = "\n".join([p[:limit] for p in reference_papers])
-        if mode == 'from_pdf':
-            source_context = f"TEXT CONTENT TO EXTRACT FROM:\n{combined_ref}\n\n"
-        else:
-            source_context = f"INSPIRATION TEXT:\n{combined_ref}\n\n"
+        source_context = f"CONTEXT TEXT:\n{combined_ref}\n\n"
 
     prompt = f"""{source_context}
 Task: Generate exactly {total_questions} MCQ questions for Indian exam '{exam_type}', Subject: '{subject}', Chapters: {chapter_list}.
@@ -100,30 +90,25 @@ Return ONLY a JSON object with this exact structure:
 """
 
     try:
-        # Use JSON mode for Gemini models (Gemma doesn't support it via this config)
         config = {}
         if 'gemini' in model_name:
             config = {"response_mime_type": "application/json"}
             
         response = model.generate_content(prompt, generation_config=config)
         raw = response.text
-        print(f"DEBUG: Received AI response from {model_name} ({len(raw)} chars)")
+        print(f"DEBUG: Received response from {model_name}")
         
-        cleaned = clean_json_string(raw)
-        return json.loads(cleaned)
+        return json.loads(clean_json_string(raw))
     except Exception as e:
         err_msg = str(e)
-        print(f"ERROR with model {model_name}: {err_msg}")
+        print(f"ERROR with {model_name}: {err_msg}")
         
-        # If it's a quota, availability, or formatting error, try the next model
-        # 429=Quota, 404=Not Found, 400=Invalid (often formatting)
-        if any(code in err_msg for code in ["429", "404", "400"]) or "quota" in err_msg.lower():
-            print(f"DEBUG: Attempting next model...")
+        # If quota (429) or model error, try next one immediately
+        if "429" in err_msg or "quota" in err_msg.lower() or "404" in err_msg or "not found" in err_msg.lower() or "400" in err_msg:
             return generate_exam_paper(exam_type, subject, chapters, total_questions, difficulty, mode, reference_papers, model_index + 1)
             
-        # For other errors, try a very small set as a fallback
+        # For small papers, try one last time with minimal questions
         if total_questions > 2:
-             print("DEBUG: Retrying same model with minimal question count...")
              return generate_exam_paper(exam_type, subject, chapters, 2, difficulty, mode, reference_papers, model_index)
              
         raise e
