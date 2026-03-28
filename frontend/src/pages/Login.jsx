@@ -25,10 +25,19 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(form.username, form.password);
-      navigate('/dashboard');
+      const user = await login(form.username, form.password);
+      console.log('Login successful, user role:', user.role);
+      
+      if (user.role === 'admin' || user.is_staff) {
+        console.log('Admin detected, performing hard redirect to submissions...');
+        window.location.href = '/admin/submissions';
+      } else {
+        console.log('Student detected, navigating to dashboard...');
+        navigate('/dashboard');
+      }
     } catch (err) {
-      setError('Invalid username or password.');
+      console.error('Login submit error:', err);
+      setError(err.response?.data?.detail || 'Invalid username or password.');
     } finally {
       setLoading(false);
     }

@@ -139,5 +139,22 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173').split(',')
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173').split(',')
 
+if not DEBUG:
+    # Aggressively trust deployment domains in production
+    CORS_ALLOWED_ORIGINS += [
+        'https://compititive-exam.vercel.app',
+        'https://compititive-exam.onrender.com'
+    ]
+    CSRF_TRUSTED_ORIGINS += [
+        'https://compititive-exam.vercel.app',
+        'https://compititive-exam.onrender.com'
+    ]
+    # Handle wildcard subdomains for Vercel
+    CORS_ALLOW_ALL_ORIGINS = True 
+
+# Filter out empty strings
+CORS_ALLOWED_ORIGINS = [h for h in CORS_ALLOWED_ORIGINS if h]
+CSRF_TRUSTED_ORIGINS = [h for h in CSRF_TRUSTED_ORIGINS if h]
+
 ANTHROPIC_API_KEY = config('ANTHROPIC_API_KEY', default='')
 GEMINI_API_KEY = config('GEMINI_API_KEY', default=config('GOOGLE_API_KEY', default=''))
