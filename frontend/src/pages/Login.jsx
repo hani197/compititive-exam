@@ -8,6 +8,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useAuth } from '../context/AuthContext';
+import api from '../lib/api';
 
 const EXAMS = ['EAMCET', 'DSC', 'Civils', 'Group Services', 'CEEP', 'ECET'];
 const COLORS = ['#f97316', '#a855f7', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
