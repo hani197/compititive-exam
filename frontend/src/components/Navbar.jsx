@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, Button, Box, Avatar, Menu, MenuItem } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Avatar, Menu, MenuItem, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -8,6 +8,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import QuizIcon from '@mui/icons-material/Quiz';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -18,6 +19,7 @@ export default function Navbar() {
   const location = useLocation();
   const isAdmin = user?.role === 'admin' || user?.is_staff;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const initials = user
     ? (user.first_name ? (user.first_name[0] + (user.last_name?.[0] || '')) : user.username[0]).toUpperCase()
@@ -38,19 +40,70 @@ export default function Navbar() {
         { label: 'History', icon: <HistoryIcon fontSize="small" />, path: '/history' },
       ];
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const drawer = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', p: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
+        <SchoolIcon color="primary" />
+        <Typography variant="h6" fontWeight={800} color="primary">EduCoach</Typography>
+      </Box>
+      <Divider />
+      <List>
+        {navItems.map((item) => (
+          <ListItem 
+            key={item.path} 
+            button 
+            onClick={() => navigate(item.path)}
+            selected={location.pathname === item.path}
+            sx={{
+              borderRadius: 2,
+              mb: 0.5,
+              '&.Mui-selected': {
+                bgcolor: 'primary.main',
+                color: 'white',
+                '& .MuiListItemIcon-root': { color: 'white' },
+                '&:hover': { bgcolor: 'primary.dark' }
+              }
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40, color: location.pathname === item.path ? 'inherit' : 'primary.main' }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 600, fontSize: '0.9rem' }} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
   return (
     <AppBar
       position="sticky"
       sx={{
         background: 'linear-gradient(135deg, #3b0764 0%, #5b21b6 50%, #7c3aed 100%)',
         borderBottom: 'none',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
       }}
     >
-      <Toolbar sx={{ gap: 1 }}>
+      <Toolbar sx={{ gap: 1, px: { xs: 1, sm: 2 } }}>
+        {/* Hamburger for Mobile */}
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ mr: 1, display: { md: 'none' } }}
+        >
+          <MenuIcon />
+        </IconButton>
+
         {/* Brand */}
         <Box
-          sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', mr: 2 }}
-          onClick={() => navigate(isAdmin ? '/admin/register' : '/dashboard')}
+          sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', mr: { xs: 0, md: 2 }, flexGrow: { xs: 1, md: 0 } }}
+          onClick={() => navigate(isAdmin ? '/admin/submissions' : '/dashboard')}
         >
           <Box sx={{
             bgcolor: 'rgba(255,255,255,0.18)',
@@ -62,7 +115,7 @@ export default function Navbar() {
           }}>
             <SchoolIcon sx={{ color: '#fff', fontSize: 22 }} />
           </Box>
-          <Box>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             <Typography fontWeight={800} fontSize="1.05rem" color="#fff" lineHeight={1}>
               EduCoach
             </Typography>
@@ -72,8 +125,8 @@ export default function Navbar() {
           </Box>
         </Box>
 
-        {/* Nav Links */}
-        <Box sx={{ display: 'flex', gap: 0.5, flexGrow: 1 }}>
+        {/* Nav Links - Desktop Only */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, flexGrow: 1 }}>
           {navItems.map(item => {
             const active = location.pathname === item.path;
             return (
@@ -89,6 +142,8 @@ export default function Navbar() {
                   borderRadius: 2.5,
                   px: 1.5, py: 0.7,
                   fontSize: '0.85rem',
+                  textTransform: 'none',
+                  fontWeight: 600,
                   '&:hover': {
                     bgcolor: 'rgba(255,255,255,0.12)',
                     color: '#fff',
@@ -103,16 +158,17 @@ export default function Navbar() {
 
         {/* User menu */}
         {user && (
-          <>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Button
               onClick={e => setAnchorEl(e.currentTarget)}
-              endIcon={<KeyboardArrowDownIcon sx={{ color: 'rgba(255,255,255,0.8)' }} />}
+              endIcon={<KeyboardArrowDownIcon sx={{ color: 'rgba(255,255,255,0.8)', display: { xs: 'none', sm: 'block' } }} />}
               sx={{
                 bgcolor: 'rgba(255,255,255,0.12)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 borderRadius: 3,
-                px: 1.5, py: 0.6,
+                px: { xs: 1, sm: 1.5 }, py: 0.6,
                 gap: 1,
+                minWidth: 0,
                 '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
               }}
             >
@@ -162,9 +218,23 @@ export default function Navbar() {
                 Logout
               </MenuItem>
             </Menu>
-          </>
+          </Box>
         )}
       </Toolbar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 260, borderRadius: '0 16px 16px 0' },
+        }}
+      >
+        {drawer}
+      </Drawer>
     </AppBar>
   );
 }
