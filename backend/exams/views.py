@@ -4,6 +4,9 @@ from .serializers import ExamTypeSerializer, ExamTypeListSerializer, SubjectSeri
 from users.views import IsAdmin
 
 
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 class ExamTypeViewSet(viewsets.ModelViewSet):
     queryset = ExamType.objects.all()
     
@@ -15,67 +18,7 @@ class ExamTypeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Direct seed for environments without shell access
         if not ExamType.objects.exists():
-            try:
-                from exams.models import ExamType, Subject, Chapter
-                
-                # Define data locally to ensure it works even if management command is inaccessible
-                EXAM_DATA = {
-                    'EAMCET': {
-                        'name': 'EAMCET (Engineering)',
-                        'subjects': {
-                            'Mathematics': ['Sets, Relations and Functions', 'Quadratic Equations', 'Calculus'],
-                            'Physics': ['Units and Measurements', 'Thermodynamics', 'Optics'],
-                            'Chemistry': ['Atomic Structure', 'Chemical Bonding', 'Organic Chemistry'],
-                        }
-                    },
-                    'DSC': {
-                        'name': 'DSC (District Selection Committee)',
-                        'subjects': {
-                            'Telugu': ['Telugu Grammar', 'Literature'],
-                            'Mathematics': ['Number System', 'Algebra', 'Geometry'],
-                            'General Knowledge': ['Current Affairs', 'Indian History'],
-                        }
-                    },
-                    'CIVILS': {
-                        'name': 'Civil Services (UPSC/APPSC)',
-                        'subjects': {
-                            'General Studies': ['Indian History', 'Economy', 'Polity'],
-                            'General Aptitude': ['Quantitative Aptitude', 'Logical Reasoning'],
-                        }
-                    },
-                    'GROUPS': {
-                        'name': 'Group Services (APPSC Groups)',
-                        'subjects': {
-                            'General Studies': ['AP History & Culture', 'Constitution'],
-                        }
-                    },
-                    'CEEP': {
-                        'name': 'CEEP (Polytechnic)',
-                        'subjects': {
-                            'Mathematics': ['Algebra', 'Trigonometry'],
-                            'Physics': ['Mechanics', 'Electricity'],
-                        }
-                    },
-                    'ECET': {
-                        'name': 'ECET (Engineering Common Entrance)',
-                        'subjects': {
-                            'Mathematics': ['Matrices', 'Calculus'],
-                            'Engineering': ['Strength of Materials'],
-                        }
-                    }
-                }
-
-                for code, data in EXAM_DATA.items():
-                    et, _ = ExamType.objects.get_or_create(code=code, defaults={'name': data['name']})
-                    for sub_name, chapters in data['subjects'].items():
-                        import re
-                        sub_code = re.sub(r'[^A-Z0-9]', '_', sub_name.upper())[:20].strip('_')
-                        subject, _ = Subject.objects.get_or_create(exam_type=et, code=sub_code, defaults={'name': sub_name})
-                        for i, ch_name in enumerate(chapters, 1):
-                            Chapter.objects.get_or_create(subject=subject, name=ch_name, defaults={'order': i})
-                print("Direct seeding successful.")
-            except Exception as e:
-                print(f"Direct seed error: {e}")
+            self._do_seed()
 
         user = self.request.user
         role = getattr(user, 'role', 'unknown')
@@ -87,6 +30,80 @@ class ExamTypeViewSet(viewsets.ModelViewSet):
             qs = ExamType.objects.filter(is_active=True)
             
         return qs.order_by('id')
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def seed(self, request):
+        """Action to manually trigger seeding from the frontend."""
+        try:
+            self._do_seed()
+            count = ExamType.objects.count()
+            return Response({'message': f'Seeding successful! {count} programs created.'})
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    def _do_seed(self):
+        try:
+            from exams.models import ExamType, Subject, Chapter
+            print("DEBUG: Starting direct seeding...")
+            # Define data locally to ensure it works even if management command is inaccessible
+            EXAM_DATA = {
+                'EAMCET': {
+                    'name': 'EAMCET (Engineering)',
+                    'subjects': {
+                        'Mathematics': ['Sets, Relations and Functions', 'Quadratic Equations', 'Calculus'],
+                        'Physics': ['Units and Measurements', 'Thermodynamics', 'Optics'],
+                        'Chemistry': ['Atomic Structure', 'Chemical Bonding', 'Organic Chemistry'],
+                    }
+                },
+                'DSC': {
+                    'name': 'DSC (District Selection Committee)',
+                    'subjects': {
+                        'Telugu': ['Telugu Grammar', 'Literature'],
+                        'Mathematics': ['Number System', 'Algebra', 'Geometry'],
+                        'General Knowledge': ['Current Affairs', 'Indian History'],
+                    }
+                },
+                'CIVILS': {
+                    'name': 'Civil Services (UPSC/APPSC)',
+                    'subjects': {
+                        'General Studies': ['Indian History', 'Economy', 'Polity'],
+                        'General Aptitude': ['Quantitative Aptitude', 'Logical Reasoning'],
+                    }
+                },
+                'GROUPS': {
+                    'name': 'Group Services (APPSC Groups)',
+                    'subjects': {
+                        'General Studies': ['AP History & Culture', 'Constitution'],
+                    }
+                },
+                'CEEP': {
+                    'name': 'CEEP (Polytechnic)',
+                    'subjects': {
+                        'Mathematics': ['Algebra', 'Trigonometry'],
+                        'Physics': ['Mechanics', 'Electricity'],
+                    }
+                },
+                'ECET': {
+                    'name': 'ECET (Engineering Common Entrance)',
+                    'subjects': {
+                        'Mathematics': ['Matrices', 'Calculus'],
+                        'Engineering': ['Strength of Materials'],
+                    }
+                }
+            }
+
+            for code, data in EXAM_DATA.items():
+                et, _ = ExamType.objects.get_or_create(code=code, defaults={'name': data['name']})
+                for sub_name, chapters in data['subjects'].items():
+                    import re
+                    sub_code = re.sub(r'[^A-Z0-9]', '_', sub_name.upper())[:20].strip('_')
+                    subject, _ = Subject.objects.get_or_create(exam_type=et, code=sub_code, defaults={'name': sub_name})
+                    for i, ch_name in enumerate(chapters, 1):
+                        Chapter.objects.get_or_create(subject=subject, name=ch_name, defaults={'order': i})
+            print("DEBUG: Direct seeding successful.")
+        except Exception as e:
+            print(f"DEBUG: Direct seed error: {e}")
+            raise e
 
     def get_serializer_class(self):
         if self.action == 'list':

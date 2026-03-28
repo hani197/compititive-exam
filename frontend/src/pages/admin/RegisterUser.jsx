@@ -47,10 +47,10 @@ function RegisterUser() {
   const [isViewOpen, setIsViewOpen] = useState(false);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const studentsUrl = 'auth/students/';
       const examTypesUrl = 'exam-types/';
-      console.log(`Fetching from: ${api.defaults.baseURL}${studentsUrl} and ${api.defaults.baseURL}${examTypesUrl}`);
       
       const [u, e] = await Promise.all([
         api.get(studentsUrl),
@@ -58,12 +58,28 @@ function RegisterUser() {
       ]);
       const usersData = u.data?.results || u.data || [];
       const examTypesData = e.data?.results || e.data || [];
-      console.log(`Loaded ${usersData.length} users and ${examTypesData.length} exam types.`);
       setUsers(usersData);
       setExamTypes(examTypesData);
+      setError('');
     } catch (err) { 
       console.error('Fetch data error:', err); 
-      setError('Failed to load data. ' + (err.response?.data?.detail || ''));
+      const status = err.response?.status;
+      const url = `${err.config?.baseURL}${err.config?.url}`;
+      const msg = err.response?.data?.detail || err.message;
+      setError(`Failed to load data (${status || 'Network Error'}). URL: ${url}. Error: ${msg}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualSeed = async () => {
+    setLoading(true);
+    try {
+      const res = await api.post('exam-types/seed/');
+      alert(res.data.message);
+      fetchData();
+    } catch (err) {
+      alert('Manual seeding failed: ' + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -205,7 +221,20 @@ function RegisterUser() {
             {editingId && <Button size="small" variant="outlined" color="error" onClick={cancelEdit}>Cancel</Button>}
           </Box>
           
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 2, borderRadius: 2 }} 
+              onClose={() => setError('')}
+              action={
+                <Button color="inherit" size="small" onClick={handleManualSeed} sx={{ fontWeight: 800 }}>
+                  TRY MANUAL DB SEED
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          )}
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
           <form onSubmit={handleSubmit} noValidate>
