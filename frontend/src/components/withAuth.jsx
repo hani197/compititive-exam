@@ -9,7 +9,9 @@ export function withAuth(Component) {
     const navigate = useNavigate();
 
     useEffect(() => {
-      if (!loading && !user) navigate('/login');
+      if (!loading && !user && !localStorage.getItem('access_token')) {
+        navigate('/login');
+      }
     }, [user, loading, navigate]);
 
     if (loading || !user) {
@@ -31,8 +33,8 @@ export function withAdmin(Component) {
 
     useEffect(() => {
       if (!loading) {
-        if (!user) navigate('/login');
-        else if (user.role !== 'admin' && !user.is_staff) navigate('/dashboard');
+        if (!user && !localStorage.getItem('access_token')) navigate('/login');
+        else if (user && user.role !== 'admin' && !user.is_staff) navigate('/dashboard');
       }
     }, [user, loading, navigate]);
 
