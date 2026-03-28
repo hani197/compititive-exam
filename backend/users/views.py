@@ -11,6 +11,22 @@ from django.core.management import call_command
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
+def maintenance_reset_admin(request):
+    """Temporary maintenance endpoint to reset the 'gen' user password."""
+    try:
+        from .models import User
+        u = User.objects.get(username='gen')
+        u.set_password('gen@1234')
+        u.save()
+        return Response({'message': 'Admin password reset successfully!'})
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
 def trigger_seed_data(request):
     """Temporary maintenance endpoint to seed data without shell access."""
     try:
