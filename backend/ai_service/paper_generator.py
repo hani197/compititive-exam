@@ -132,14 +132,38 @@ def evaluate_descriptive_answer(question: str, correct_answer: str, student_answ
 def generate_performance_analysis(student_name: str, exam_type: str, subject: str,
                                    chapter_analysis: dict, percentage: float, model_index: int = 0) -> str:
     if model_index >= len(MODELS_TO_TRY):
-        # THROW instead of returning string, so the view knows it failed
         raise Exception("All AI models failed to generate analysis.")
         
     model_name = MODELS_TO_TRY[model_index]
-    print(f"DEBUG: Attempting analysis with {model_name} (Attempt {model_index + 1})...")
+    print(f"DEBUG: Attempting beautiful analysis with {model_name}...")
     try:
         model = genai.GenerativeModel(model_name)
-        prompt = f"Analyze student performance and provide detailed feedback and recommendations. Student: {student_name} | Exam: {exam_type} | Subject: {subject} | Score: {percentage}% | Data: {json.dumps(chapter_analysis)}"
+        prompt = f"""
+ACT AS AN EXPERT ACADEMIC COUNSELOR AND MENTOR.
+Analyze the following student performance data and provide a BEAUTIFUL, MOTIVATIONAL, and DETAILED performance report in Markdown format.
+
+STUDENT INFO:
+- Name: {student_name}
+- Exam: {exam_type}
+- Subject: {subject}
+- Overall Score: {percentage}%
+
+PERFORMANCE DATA:
+{json.dumps(chapter_analysis, indent=2)}
+
+THE REPORT MUST INCLUDE:
+1. 🌟 **Overall Performance**: A warm, encouraging summary of their results.
+2. ✅ **Key Strengths**: Specific praise for chapters where they scored well.
+3. 🛠️ **Focus Areas**: Constructive and detailed advice for chapters that need more work.
+4. 📈 **7-Day Action Plan**: A step-by-step study schedule to improve.
+5. 💡 **Pro Tip**: A specific test-taking strategy relevant to {exam_type}.
+6. ✨ **Motivational Closing**: An inspiring final quote or thought.
+
+FORMATTING RULES:
+- Use clear headers and bullet points.
+- Use bold text for key insights.
+- Keep the tone professional, supportive, and inspiring.
+"""
         response = model.generate_content(prompt, safety_settings=SAFETY_SETTINGS)
         return response.text.strip()
     except Exception as e:
