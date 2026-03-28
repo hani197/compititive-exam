@@ -19,15 +19,18 @@ def health_check(request):
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def maintenance_reset_admin(request):
-    """Temporary maintenance endpoint to reset the 'gen' user password."""
+    """Temporary maintenance endpoint to reset or create the 'gen' user."""
     try:
         from .models import User
-        u = User.objects.get(username='gen')
+        u, created = User.objects.get_or_create(username='gen')
         u.set_password('gen@1234')
+        u.role = 'admin'
+        u.is_staff = True
+        u.is_superuser = True
+        u.email = 'admin@example.com'
         u.save()
-        return Response({'message': 'Admin password reset successfully!'})
-    except User.DoesNotExist:
-        return Response({'error': 'User not found'}, status=404)
+        msg = 'Admin password reset successfully!' if not created else 'Admin user created successfully!'
+        return Response({'message': msg})
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
