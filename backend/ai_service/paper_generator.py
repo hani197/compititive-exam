@@ -26,6 +26,14 @@ MODELS_TO_TRY = [
     'gemma-3-4b-it'               # Confirmed working in gemini.js
 ]
 
+# Safety settings to prevent "Candidate was blocked" errors
+SAFETY_SETTINGS = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+]
+
 def clean_json_string(text):
     """Deep clean JSON string for common LLM errors."""
     if not text:
@@ -59,7 +67,7 @@ def generate_exam_paper(exam_type: str, subject: str, chapters: list[str],
         raise Exception("All AI models are currently busy or at quota limit. Please wait 60 seconds and try again.")
 
     model_name = MODELS_TO_TRY[model_index]
-    print(f"DEBUG: Attempting AI generation with {model_name}...")
+    print(f"DEBUG: Attempting AI generation with {model_name} (Attempt {model_index + 1})...")
     
     model = genai.GenerativeModel(model_name)
     chapter_list = ", ".join(chapters)
@@ -95,12 +103,13 @@ Return ONLY a JSON object with this exact structure:
         if 'gemini' in model_name:
             config = {"response_mime_type": "application/json"}
             
-        response = model.generate_content(prompt, generation_config=config)
+        response = model.generate_content(prompt, generation_config=config, safety_settings=SAFETY_SETTINGS)
         raw = response.text
         return json.loads(clean_json_string(raw))
     except Exception as e:
         err_msg = str(e)
-        if any(code in err_msg for code in ["429", "404", "400"]) or "quota" in err_msg.lower():
+        print(f"ERROR with {model_name}: {err_msg}")
+        if any(code in err_msg for code in ["429", "404", "400"]) or "quota" in err_msg.lower() or "blocked" in err_msg.lower():
             return generate_exam_paper(exam_type, subject, chapters, total_questions, difficulty, mode, reference_papers, model_index + 1)
         if total_questions > 2:
              return generate_exam_paper(exam_type, subject, chapters, 2, difficulty, mode, reference_papers, model_index)
@@ -114,21 +123,25 @@ def evaluate_descriptive_answer(question: str, correct_answer: str, student_answ
     try:
         model = genai.GenerativeModel(model_name)
         prompt = f"Evaluate. JSON only. Q: {question} | A: {correct_answer} | Student: {student_answer} | Marks: {marks}"
-        response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
+        response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"}, safety_settings=SAFETY_SETTINGS)
         return json.loads(clean_json_string(response.text))
-    except Exception:
+    except Exception as e:
+        print(f"Eval error with {model_name}: {e}")
         return evaluate_descriptive_answer(question, correct_answer, student_answer, marks, model_index + 1)
 
 def generate_performance_analysis(student_name: str, exam_type: str, subject: str,
                                    chapter_analysis: dict, percentage: float, model_index: int = 0) -> str:
     if model_index >= len(MODELS_TO_TRY):
-        return "AI analysis currently unavailable due to high traffic. Please try again later."
+        # THROW instead of returning string, so the view knows it failed
+        raise Exception("All AI models failed to generate analysis.")
         
     model_name = MODELS_TO_TRY[model_index]
+    print(f"DEBUG: Attempting analysis with {model_name} (Attempt {model_index + 1})...")
     try:
         model = genai.GenerativeModel(model_name)
         prompt = f"Analyze student performance and provide detailed feedback and recommendations. Student: {student_name} | Exam: {exam_type} | Subject: {subject} | Score: {percentage}% | Data: {json.dumps(chapter_analysis)}"
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, safety_settings=SAFETY_SETTINGS)
         return response.text.strip()
-    except Exception:
+    except Exception as e:
+        print(f"Analysis error with {model_name}: {e}")
         return generate_performance_analysis(student_name, exam_type, subject, chapter_analysis, percentage, model_index + 1)

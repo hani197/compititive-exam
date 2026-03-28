@@ -53,8 +53,11 @@ function Submissions() {
       const newFeedback = res.data.feedback;
       setSelectedResult(prev => ({ ...prev, ai_overall_feedback: newFeedback }));
       fetchResults();
+      alert('Analysis regenerated successfully!');
     } catch (err) {
-      alert('Regeneration failed.');
+      console.error(err);
+      const msg = err.response?.data?.error || 'Regeneration failed.';
+      alert(`Regeneration failed: ${msg}`);
     } finally {
       setRegenerating(false);
     }
