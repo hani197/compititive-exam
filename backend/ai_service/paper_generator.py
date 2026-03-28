@@ -17,8 +17,8 @@ if api_key:
 else:
     print("CRITICAL: No GEMINI_API_KEY found in settings or environment.")
 
-# Use 1.5 Flash for better reliability and JSON support
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Use 2.0 Flash for best reliability
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 def clean_json_string(text):
     """Deep clean JSON string for common LLM errors."""
