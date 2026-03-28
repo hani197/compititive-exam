@@ -13,7 +13,7 @@ function HistoryPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/results/').then(res => {
+    api.get('results/').then(res => {
       setResults(res.data.results || res.data);
     }).finally(() => setLoading(false));
   }, []);

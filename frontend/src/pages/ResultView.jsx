@@ -29,13 +29,13 @@ function ResultView() {
     
     const fetchResult = async () => {
       try {
-        const res = await api.get('/results/?session=' + sessionId);
+        const res = await api.get('results/?session=' + sessionId);
         const list = res.data.results || res.data;
         if (list.length > 0) {
           setResult(list[0]);
         } else {
           // Check if session exists but result is not confirmed
-          const sessRes = await api.get('/sessions/' + sessionId + '/');
+          const sessRes = await api.get('sessions/' + sessionId + '/');
           if (sessRes.data.status === 'evaluated') {
             setError('PENDING_APPROVAL');
           } else {

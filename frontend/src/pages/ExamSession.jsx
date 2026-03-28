@@ -22,7 +22,7 @@ function ExamSession() {
 
   useEffect(() => {
     if (!sessionId) return;
-    api.get('/sessions/' + sessionId + '/').then(res => {
+    api.get('sessions/' + sessionId + '/').then(res => {
       setSession(res.data);
       const qCount = res.data.paper_detail?.questions?.length || 0;
       setQuestions(res.data.paper_detail?.questions || []);
@@ -41,12 +41,13 @@ function ExamSession() {
       answer_text: val.length > 1 ? val : '',
     }));
     try {
-      await api.post('/sessions/' + sessionId + '/submit/', {
+      await api.post('sessions/' + sessionId + '/submit/', {
         answers: answersArray,
         time_taken_seconds: timeTaken,
       });
       navigate('/result/' + sessionId);
     } catch (err) {
+
       console.error(err);
     } finally {
       setSubmitting(false);

@@ -22,65 +22,56 @@ class RegistrationRequestCreateView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
-        role = request.data.get('role')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        role = data.get('role')
+
         # If it's a coaching centre, create it directly
         if role == 'coaching_centre':
-            email = request.data.get('email')
-            username = request.data.get('username') or email.split('@')[0]
-            password = request.data.get('password', 'Admin@123') # Default if not provided
+            email = data.get('email')
+            username = data.get('username') or email.split('@')[0]
+            password = data.get('password', 'Admin@123')
             
             if User.objects.filter(username=username).exists():
                 return Response({'error': 'Username already taken'}, status=400)
             
             # 1. Create Centre
             centre = CoachingCentre.objects.create(
-                name=request.data.get('centre_name'),
-                code=f"C-{request.data.get('centre_name')[:3].upper()}-{timezone.now().strftime('%S%f')[:4]}",
+                name=data.get('centre_name'),
+                code=f"C-{data.get('centre_name')[:3].upper()}-{timezone.now().strftime('%S%f')[:4]}",
                 email=email,
-                phone=request.data.get('phone'),
-                city=request.data.get('city'),
-                state=request.data.get('state', 'Unknown'),
-                pincode=request.data.get('pincode', '000000'),
-                address=request.data.get('centre_address', ''),
-                contact_person=request.data.get('full_name'),
-                contact_person_phone=request.data.get('phone') # Added
+                phone=data.get('phone'),
+                city=data.get('city'),
+                state=data.get('state', 'Unknown'),
+                pincode=data.get('pincode', '000000'),
+                address=data.get('centre_address', ''),
+                contact_person=data.get('full_name'),
+                contact_person_phone=data.get('phone')
             )
             
             # 2. Create Admin User for this centre
-            names = request.data.get('full_name', '').split(' ', 1)
+            names = data.get('full_name', '').split(' ', 1)
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 password=password,
                 first_name=names[0],
                 last_name=names[1] if len(names) > 1 else '',
-                role='admin', # They are the admin of this centre
+                role='admin',
                 coaching_centre=centre
             )
             centre.director = user
             centre.save()
             
             # 3. Create Request record for history
-            RegistrationRequest.objects.create(
-                full_name=request.data.get('full_name'),
-                email=email,
-                phone=request.data.get('phone'),
-                role='coaching_centre',
-                centre_name=request.data.get('centre_name'),
-                centre_address=request.data.get('centre_address'),
-                city=request.data.get('city'),
-                username=username,
-                password=password, # In real app, we shouldn't store this in plain text, but keeping it for now
-                message=request.data.get('message', ''),
-                status='approved',
-                created_user=user,
-                coaching_centre=centre
-            )
+            serializer.save(status='approved', created_user=user, coaching_centre=centre)
             
             return Response({'message': 'Coaching Centre registered successfully!', 'username': username}, status=201)
         
         # For students/instructors, create a pending request
-        return super().create(request, *args, **kwargs)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class RegistrationRequestListView(generics.ListAPIView):
