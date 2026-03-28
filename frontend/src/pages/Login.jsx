@@ -22,7 +22,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
       const user = await login(form.username, form.password);
@@ -35,10 +34,21 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error('Login submit error:', err);
-      const detail = err.response?.data?.detail || err.response?.data?.error || JSON.stringify(err.response?.data);
-      setError(`Login Failed: ${detail || 'Invalid username or password.'}`);
+      const status = err.response?.status;
+      const data = err.response?.data;
+      const detail = data?.detail || data?.error || JSON.stringify(data);
+      setError(`Login Failed (${status || 'Network Error'}): ${detail || 'Invalid username or password.'}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTestConnection = async () => {
+    try {
+      const res = await api.get('exam-types/');
+      alert(`Connection Success! Backend reached. Status: ${res.status}`);
+    } catch (err) {
+      alert(`Connection Failed! Could not reach backend. Error: ${err.message}\nURL: ${api.defaults.baseURL}exam-types/`);
     }
   };
 
@@ -175,6 +185,17 @@ export default function LoginPage() {
             >
               Emergency: Reset Admin Password
             </Button>
+            <Box mt={1.5}>
+              <Button 
+                fullWidth
+                variant="outlined"
+                size="small"
+                onClick={handleTestConnection}
+                sx={{ color: '#7c3aed', borderColor: '#7c3aed', fontSize: '0.75rem', fontWeight: 800, py: 1 }}
+              >
+                Diagnostic: Test Backend Connection
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Box>
