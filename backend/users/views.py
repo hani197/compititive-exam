@@ -11,6 +11,13 @@ from django.core.management import call_command
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
+def health_check(request):
+    """Public endpoint for connection testing."""
+    return Response({'status': 'ok', 'message': 'Backend is reachable'})
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
 def maintenance_reset_admin(request):
     """Temporary maintenance endpoint to reset the 'gen' user password."""
     try:

@@ -46,10 +46,11 @@ export default function LoginPage() {
 
   const handleTestConnection = async () => {
     try {
-      const res = await api.get('exam-types/');
-      alert(`Connection Success! Backend reached. Status: ${res.status}`);
+      const pingUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}`.replace('/api', '') + '/maintenance/ping/';
+      const res = await axios.get(pingUrl);
+      alert(`Connection Success! Backend reached at: ${pingUrl}\nStatus: ${res.status} (${res.data.message})`);
     } catch (err) {
-      alert(`Connection Failed! Could not reach backend. Error: ${err.message}\nURL: ${api.defaults.baseURL}exam-types/`);
+      alert(`Connection Failed! Error: ${err.message}\nCheck your Vercel VITE_API_URL.`);
     }
   };
 

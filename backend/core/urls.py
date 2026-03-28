@@ -19,10 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users.views import RegistrationRequestCreateView, trigger_seed_data, maintenance_reset_admin
+from users.views import RegistrationRequestCreateView, trigger_seed_data, maintenance_reset_admin, health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('maintenance/ping/', health_check, name='health-check'),
     path('maintenance/reset-admin/', maintenance_reset_admin, name='reset-admin'),
     path('maintenance/seed/', trigger_seed_data, name='trigger-seed'),
     path('api/maintenance/seed/', trigger_seed_data, name='api-trigger-seed'),
