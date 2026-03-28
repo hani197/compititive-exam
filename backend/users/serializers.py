@@ -55,7 +55,7 @@ class RegistrationRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'full_name', 'role', 'email', 'phone', 'exam_interested',
                   'exam_interested_name', 'centre_name', 'centre_address', 'city',
                   'username', 'password', 'message',
-                  'coaching_centre', 'status', 'requested_at',
+                  'coaching_centre', 'status', 'requested_at', 'created_user',
                   'address', 'qualification', 'parent_name', 'parent_phone', 'age',
                   'tenth_percentage', 'tenth_year', 'intermediate_percentage', 
                   'intermediate_year', 'degree_type', 'degree_percentage', 'degree_year',

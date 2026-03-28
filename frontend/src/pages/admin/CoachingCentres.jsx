@@ -59,7 +59,7 @@ const CoachingCentres = () => {
   const fetchCentres = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/coaching/centres/');
+      const response = await api.get('coaching/centres/');
       setCentres(response.data);
       setError('');
     } catch (err) {
@@ -116,10 +116,10 @@ const CoachingCentres = () => {
       }
 
       if (editingCentre) {
-        await api.put(`/coaching/centres/${editingCentre.id}/`, formData);
+        await api.put(`coaching/centres/${editingCentre.id}/`, formData);
         setSuccess('Coaching centre updated successfully');
       } else {
-        await api.post('/coaching/centres/', formData);
+        await api.post('coaching/centres/', formData);
         setSuccess('Coaching centre created successfully');
       }
 
@@ -133,7 +133,7 @@ const CoachingCentres = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this coaching centre?')) {
       try {
-        await api.delete(`/coaching/centres/${id}/`);
+        await api.delete(`coaching/centres/${id}/`);
         setSuccess('Coaching centre deleted successfully');
         fetchCentres();
       } catch (err) {

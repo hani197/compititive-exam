@@ -48,15 +48,22 @@ function RegisterUser() {
 
   const fetchData = async () => {
     try {
+      const studentsUrl = 'auth/students/';
+      const examTypesUrl = 'exam-types/';
+      console.log(`Fetching from: ${api.defaults.baseURL}${studentsUrl} and ${api.defaults.baseURL}${examTypesUrl}`);
+      
       const [u, e] = await Promise.all([
-        api.get('/auth/students/'),
-        api.get('/exam-types/')
+        api.get(studentsUrl),
+        api.get(examTypesUrl)
       ]);
-      setUsers(u.data?.results || u.data || []);
-      setExamTypes(e.data?.results || e.data || []);
+      const usersData = u.data?.results || u.data || [];
+      const examTypesData = e.data?.results || e.data || [];
+      console.log(`Loaded ${usersData.length} users and ${examTypesData.length} exam types.`);
+      setUsers(usersData);
+      setExamTypes(examTypesData);
     } catch (err) { 
-      console.error(err); 
-      setError('Failed to load data.');
+      console.error('Fetch data error:', err); 
+      setError('Failed to load data. ' + (err.response?.data?.detail || ''));
     } finally {
       setLoading(false);
     }
@@ -111,10 +118,10 @@ function RegisterUser() {
 
     try {
       if (editingId) {
-        await api.patch(`/auth/students/${editingId}/`, submissionData);
+        await api.patch(`auth/students/${editingId}/`, submissionData);
         setSuccess('Profile updated successfully.');
       } else {
-        const res = await api.post('/auth/students/register/', submissionData);
+        const res = await api.post('auth/students/register/', submissionData);
         setSuccess('Account created for ' + (res.data.first_name || res.data.username));
       }
       cancelEdit();
@@ -146,7 +153,7 @@ function RegisterUser() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this user?")) return;
     try {
-      await api.delete(`/auth/students/${id}/`);
+      await api.delete(`auth/students/${id}/`);
       setSuccess('User deleted.');
       fetchData();
     } catch (err) { setError('Failed to delete.'); }
@@ -225,9 +232,21 @@ function RegisterUser() {
                   {form.role === 'student' && (
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                       <TextField fullWidth label="Age" value={form.age} InputProps={{ readOnly: true }} size="small" />
+                      
+                      {examTypes.length === 0 && (
+                        <Alert severity="warning" size="small" sx={{ mb: 1, py: 0 }}>
+                          No programs found. 
+                          <Button size="small" onClick={fetchData} sx={{ ml: 1, fontWeight: 800 }}>Refresh List</Button>
+                        </Alert>
+                      )}
+
                       <FormControl fullWidth size="small">
-                        <InputLabel>Exam Program</InputLabel>
-                        <Select value={form.exam_type} label="Exam Program" onChange={set('exam_type')}>
+                        <InputLabel>
+                          {examTypes.length > 0 
+                            ? `Exam Program (${examTypes.length} found)` 
+                            : 'Exam Program (None found)'}
+                        </InputLabel>
+                        <Select value={form.exam_type} label={examTypes.length > 0 ? 'Exam Program' : 'Exam Program (None found)'} onChange={set('exam_type')}>
                           {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                         </Select>
                       </FormControl>

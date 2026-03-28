@@ -27,8 +27,8 @@ function Assignments() {
     setLoading(true);
     try {
       const [userRes, assignRes] = await Promise.all([
-        api.get('/auth/students/'),
-        api.get('/auth/assignments/')
+        api.get('auth/students/'),
+        api.get('auth/assignments/')
       ]);
       const allUsers = userRes.data.results || userRes.data || [];
       setStudents(allUsers.filter(u => u.role === 'student'));
@@ -52,10 +52,10 @@ function Assignments() {
     }
     try {
       if (editingId) {
-        await api.put(`/auth/assignments/${editingId}/`, form);
+        await api.put(`auth/assignments/${editingId}/`, form);
         setSuccess('Assignment updated successfully!');
       } else {
-        await api.post('/auth/assignments/', form);
+        await api.post('auth/assignments/', form);
         setSuccess('Assignment created successfully!');
       }
       cancelEdit();
@@ -83,7 +83,7 @@ function Assignments() {
   const handleDelete = async (id) => {
     if (!window.confirm('Remove this assignment?')) return;
     try {
-      await api.delete(`/auth/assignments/${id}/`);
+      await api.delete(`auth/assignments/${id}/`);
       setSuccess('Assignment removed.');
       fetchData();
     } catch (err) {

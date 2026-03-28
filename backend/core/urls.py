@@ -19,9 +19,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from users.views import RegistrationRequestCreateView, trigger_seed_data
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('maintenance/seed/', trigger_seed_data, name='trigger-seed'),
+    path('api/maintenance/seed/', trigger_seed_data, name='api-trigger-seed'),
+    path('api/auth/request-access/', RegistrationRequestCreateView.as_view(), name='core-request-access'),
     path('api/auth/', include('users.urls')),
+    path('api/auth', include('users.urls')),
     path('api/', include('exams.urls')),
     path('api/enrollments/', include('enrollments.urls')),
     path('api/materials/', include('materials.urls')),

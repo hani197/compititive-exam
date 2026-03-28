@@ -7,6 +7,19 @@ from .serializers import (RegisterSerializer, UserSerializer,
                         RegistrationRequestSerializer, StudentInstructorAssignmentSerializer)
 
 
+from django.core.management import call_command
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def trigger_seed_data(request):
+    """Temporary maintenance endpoint to seed data without shell access."""
+    try:
+        call_command('seed_data')
+        return Response({'message': 'Seed data triggered successfully! Check your database.'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (

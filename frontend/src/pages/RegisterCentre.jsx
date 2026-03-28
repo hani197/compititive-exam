@@ -41,9 +41,21 @@ export default function RegisterCentrePage() {
       await api.post('auth/request-access/', form);
       setSuccess(true);
     } catch (err) {
-
       const d = err.response?.data;
-      setError(d ? JSON.stringify(d) : 'Submission failed. Please try again.');
+      const failingUrl = `${err.config?.baseURL}${err.config?.url}`;
+      
+      if (typeof d === 'string' && d.includes('<!doctype html>')) {
+        const isVercel = window.location.hostname.includes('vercel.app');
+        const isTargetingSelf = failingUrl.includes(window.location.hostname);
+        
+        if (isVercel && isTargetingSelf) {
+          setError(`CRITICAL CONFIG ERROR: Your frontend is trying to call the API on Vercel, but the backend is on Render. Please set VITE_API_URL in Vercel settings to your Render URL.`);
+        } else {
+          setError(`404 Error: The backend is missing at "${failingUrl}". Please check your VITE_API_URL environment variable.`);
+        }
+      } else {
+        setError(d ? (typeof d === 'object' ? JSON.stringify(d) : d) : `Failed to reach ${failingUrl}`);
+      }
     } finally { setLoading(false); }
   };
 

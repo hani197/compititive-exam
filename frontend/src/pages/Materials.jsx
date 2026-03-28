@@ -27,7 +27,7 @@ function Materials() {
 
   useEffect(() => {
     if (!examTypeId) return;
-    api.get('/subjects/?exam_type=' + examTypeId).then(res => {
+    api.get('subjects/?exam_type=' + examTypeId).then(res => {
       setSubjects(res.data.results || res.data);
     });
   }, [examTypeId]);
@@ -36,7 +36,7 @@ function Materials() {
     if (!examTypeId) return;
     const params = new URLSearchParams({ exam_type: examTypeId });
     if (selectedSubject) params.append('subject', selectedSubject);
-    api.get('/materials/?' + params).then(res => {
+    api.get('materials/?' + params).then(res => {
       setMaterials(res.data.results || res.data);
     }).finally(() => setLoading(false));
   }, [examTypeId, selectedSubject]);

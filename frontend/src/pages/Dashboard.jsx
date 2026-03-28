@@ -48,8 +48,8 @@ function Dashboard() {
     const fetchData = async () => {
       try {
         const endpoints = isAdmin 
-          ? [api.get('/results/dashboard/'), api.get('/papers/old-papers/')] 
-          : [api.get('/papers/assignments/'), api.get('/results/dashboard/'), api.get('/sessions/'), api.get('/papers/old-papers/')];
+          ? [api.get('results/dashboard/'), api.get('papers/old-papers/')] 
+          : [api.get('papers/assignments/'), api.get('results/dashboard/'), api.get('sessions/'), api.get('papers/old-papers/')];
 
         const res = await Promise.all(endpoints);
         
@@ -238,7 +238,7 @@ function StudentDashboardView({ data, navigate }) {
 
     setLoadingPaper(assignment.id);
     try {
-      const res = await api.post('/sessions/', { paper_id: paperId });
+      const res = await api.post('sessions/', { paper_id: paperId });
       navigate('/exam/' + res.data.id);
     } catch (err) {
       console.error("Failed to start exam:", err);

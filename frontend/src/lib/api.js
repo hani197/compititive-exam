@@ -1,14 +1,28 @@
 import axios from 'axios';
 
+const rawBaseURL = import.meta.env.VITE_API_URL;
+let baseURL = '';
+
+if (rawBaseURL) {
+  baseURL = rawBaseURL.endsWith('/') ? rawBaseURL : `${rawBaseURL}/`;
+} else {
+  // Fallback for local development
+  baseURL = 'http://localhost:8000/api/';
+  
+  // Warning for production
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    console.warn('WARNING: VITE_API_URL is not set. API calls will likely fail on production.');
+  }
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ? 
-    (import.meta.env.VITE_API_URL.endsWith('/') ? import.meta.env.VITE_API_URL : `${import.meta.env.VITE_API_URL}/`) : 
-    'http://localhost:8000/api/',
+  baseURL,
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  console.log(`[API Request] ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
   return config;
 });
 

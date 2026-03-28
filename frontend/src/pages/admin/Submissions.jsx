@@ -20,7 +20,7 @@ function Submissions() {
 
   const fetchResults = async () => {
     try {
-      const res = await api.get('/results/');
+      const res = await api.get('results/');
       setResults(res.data.results || res.data || []);
     } catch (err) {
       setError('Failed to fetch submissions.');
@@ -34,7 +34,7 @@ function Submissions() {
   const handleConfirm = async (id) => {
     setConfirming(true);
     try {
-      await api.post(`/results/${id}/confirm_analysis/`);
+      await api.post(`results/${id}/confirm_analysis/`);
       fetchResults();
       setSelectedResult(null);
     } catch (err) {

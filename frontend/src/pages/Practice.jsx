@@ -23,14 +23,14 @@ function Practice() {
 
   useEffect(() => {
     if (!examTypeId) return;
-    api.get('/subjects/?exam_type=' + examTypeId).then(res => {
+    api.get('subjects/?exam_type=' + examTypeId).then(res => {
       setSubjects(res.data.results || res.data);
     });
   }, [examTypeId]);
 
   useEffect(() => {
     if (!selectedSubject) return;
-    api.get('/chapters/?subject=' + selectedSubject).then(res => {
+    api.get('chapters/?subject=' + selectedSubject).then(res => {
       setChapters(res.data.results || res.data);
       setSelectedChapters([]);
     });
@@ -48,7 +48,7 @@ function Practice() {
     setError('');
     setLoading(true);
     try {
-      const paperRes = await api.post('/papers/generate/', {
+      const paperRes = await api.post('papers/generate/', {
         exam_type_id: parseInt(examTypeId),
         subject_id: parseInt(selectedSubject),
         chapter_ids: selectedChapters,
@@ -56,7 +56,7 @@ function Practice() {
         difficulty,
         duration_minutes: duration,
       });
-      const sessionRes = await api.post('/sessions/', { paper_id: paperRes.data.id });
+      const sessionRes = await api.post('sessions/', { paper_id: paperRes.data.id });
       navigate('/exam/' + sessionRes.data.id);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to generate paper. Try again.');

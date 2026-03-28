@@ -24,8 +24,8 @@ function OldPapers() {
   const fetchData = async () => {
     try {
       const [pRes, eRes] = await Promise.all([
-        api.get('/papers/old-papers/'),
-        api.get('/exam-types/')
+        api.get('papers/old-papers/'),
+        api.get('exam-types/')
       ]);
       setPapers(pRes.data?.results || pRes.data || []);
       setExamTypes(eRes.data?.results || eRes.data || []);
@@ -55,7 +55,7 @@ function OldPapers() {
     formData.append('description', form.description);
 
     try {
-      await api.post('/papers/old-papers/', formData, {
+      await api.post('papers/old-papers/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSuccess('Paper uploaded successfully!');
@@ -70,7 +70,7 @@ function OldPapers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this paper?')) return;
     try {
-      await api.delete(`/papers/old-papers/${id}/`);
+      await api.delete(`papers/old-papers/${id}/`);
       setSuccess('Paper deleted.');
       fetchData();
     } catch (err) {

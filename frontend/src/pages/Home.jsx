@@ -16,7 +16,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/coaching/centres/')
+    api.get('coaching/centres/')
       .then(res => setCentres(res.data.results || res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

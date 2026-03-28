@@ -13,9 +13,25 @@ class ExamTypeViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
-        if self.request.user.role == 'admin' or self.request.user.is_staff:
-            return ExamType.objects.all().order_by('id')
-        return ExamType.objects.filter(is_active=True).order_by('id')
+        # Lazy seed for environments without shell access
+        # Trigger for any authenticated user if database is empty
+        if not ExamType.objects.exists():
+            try:
+                from django.core.management import call_command
+                call_command('seed_data')
+            except Exception as e:
+                print(f"Lazy seed error: {e}")
+
+        user = self.request.user
+        role = getattr(user, 'role', 'unknown')
+        is_staff = getattr(user, 'is_staff', False)
+
+        if role == 'admin' or is_staff:
+            qs = ExamType.objects.all()
+        else:
+            qs = ExamType.objects.filter(is_active=True)
+            
+        return qs.order_by('id')
 
     def get_serializer_class(self):
         if self.action == 'list':

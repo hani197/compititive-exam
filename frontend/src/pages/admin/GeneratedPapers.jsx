@@ -22,7 +22,7 @@ function GeneratedPapers() {
 
   const fetchPapers = async () => {
     try {
-      const res = await api.get('/papers/');
+      const res = await api.get('papers/');
       setPapers(res.data?.results || res.data || []);
     } catch (err) {
       console.error(err);
@@ -37,7 +37,7 @@ function GeneratedPapers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this generated paper and all its questions?')) return;
     try {
-      await api.delete(`/papers/${id}/`);
+      await api.delete(`papers/${id}/`);
       fetchPapers();
     } catch (err) {
       alert('Failed to delete paper.');

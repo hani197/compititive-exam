@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import (RegisterView, ProfileView, StudentListView, StudentDetailView,
@@ -13,7 +13,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', ProfileView.as_view(), name='profile'),
     # Public
-    path('request-access/', RegistrationRequestCreateView.as_view(), name='request-access'),
+    re_path(r'^request-access/?$', RegistrationRequestCreateView.as_view(), name='request-access'),
     # Admin only
     path('requests/', RegistrationRequestListView.as_view(), name='request-list'),
     path('requests/<int:pk>/approve/', approve_request, name='approve-request'),
