@@ -106,3 +106,24 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     def confirm_analysis(self, request, pk=None):
         """Frontend calls this endpoint to confirm analysis."""
         return self.confirm(request, pk)
+
+    @action(detail=True, methods=['post'], url_path='regenerate_analysis', permission_classes=[IsAdmin])
+    def regenerate_analysis(self, request, pk=None):
+        """Manually re-trigger AI analysis for a result."""
+        result = self.get_object()
+        from ai_service.paper_generator import generate_performance_analysis
+        
+        try:
+            ai_feedback = generate_performance_analysis(
+                student_name=result.student.get_full_name() or result.student.username,
+                exam_type=result.session.paper.exam_type.name,
+                subject=result.session.paper.subject.name if result.session.paper.subject else "Multiple Subjects",
+                chapter_analysis=result.chapter_analysis,
+                percentage=result.percentage
+            )
+            result.ai_overall_feedback = ai_feedback
+            result.recommendations = ai_feedback
+            result.save()
+            return Response({'message': 'Analysis regenerated successfully!', 'feedback': ai_feedback})
+        except Exception as e:
+            return Response({'error': f'Regeneration failed: {str(e)}'}, status=500)

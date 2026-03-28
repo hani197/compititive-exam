@@ -5,6 +5,7 @@ from PyPDF2 import PdfReader
 import io
 import re
 import os
+import time
 
 # Configure Gemini
 api_key = getattr(settings, 'GEMINI_API_KEY', None)
@@ -65,7 +66,7 @@ def generate_exam_paper(exam_type: str, subject: str, chapters: list[str],
     
     source_context = ""
     if reference_papers:
-        limit = 8000 # Truncate slightly more to stay under token limits
+        limit = 8000 
         combined_ref = "\n".join([p[:limit] for p in reference_papers])
         source_context = f"CONTEXT TEXT:\n{combined_ref}\n\n"
 
@@ -96,32 +97,38 @@ Return ONLY a JSON object with this exact structure:
             
         response = model.generate_content(prompt, generation_config=config)
         raw = response.text
-        print(f"DEBUG: Received response from {model_name}")
-        
         return json.loads(clean_json_string(raw))
     except Exception as e:
         err_msg = str(e)
-        print(f"ERROR with {model_name}: {err_msg}")
-        
-        # If quota (429) or model error, try next one immediately
-        if "429" in err_msg or "quota" in err_msg.lower() or "404" in err_msg or "not found" in err_msg.lower() or "400" in err_msg:
+        if any(code in err_msg for code in ["429", "404", "400"]) or "quota" in err_msg.lower():
             return generate_exam_paper(exam_type, subject, chapters, total_questions, difficulty, mode, reference_papers, model_index + 1)
-            
-        # For small papers, try one last time with minimal questions
         if total_questions > 2:
              return generate_exam_paper(exam_type, subject, chapters, 2, difficulty, mode, reference_papers, model_index)
-             
         raise e
 
-def evaluate_descriptive_answer(question: str, correct_answer: str, student_answer: str, marks: float) -> dict:
-    model = genai.GenerativeModel(MODELS_TO_TRY[0])
-    prompt = f"Evaluate. JSON only. Q: {question} | A: {correct_answer} | Student: {student_answer} | Marks: {marks}"
-    response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
-    return json.loads(clean_json_string(response.text))
+def evaluate_descriptive_answer(question: str, correct_answer: str, student_answer: str, marks: float, model_index: int = 0) -> dict:
+    if model_index >= len(MODELS_TO_TRY):
+        return {"marks_obtained": 0, "is_correct": False, "feedback": "AI Evaluation failed."}
+        
+    model_name = MODELS_TO_TRY[model_index]
+    try:
+        model = genai.GenerativeModel(model_name)
+        prompt = f"Evaluate. JSON only. Q: {question} | A: {correct_answer} | Student: {student_answer} | Marks: {marks}"
+        response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
+        return json.loads(clean_json_string(response.text))
+    except Exception:
+        return evaluate_descriptive_answer(question, correct_answer, student_answer, marks, model_index + 1)
 
 def generate_performance_analysis(student_name: str, exam_type: str, subject: str,
-                                   chapter_analysis: dict, percentage: float) -> str:
-    model = genai.GenerativeModel(MODELS_TO_TRY[0])
-    prompt = f"Analyze performance. Student: {student_name} | Score: {percentage}% | Data: {json.dumps(chapter_analysis)}"
-    response = model.generate_content(prompt)
-    return response.text.strip()
+                                   chapter_analysis: dict, percentage: float, model_index: int = 0) -> str:
+    if model_index >= len(MODELS_TO_TRY):
+        return "AI analysis currently unavailable due to high traffic. Please try again later."
+        
+    model_name = MODELS_TO_TRY[model_index]
+    try:
+        model = genai.GenerativeModel(model_name)
+        prompt = f"Analyze student performance and provide detailed feedback and recommendations. Student: {student_name} | Exam: {exam_type} | Subject: {subject} | Score: {percentage}% | Data: {json.dumps(chapter_analysis)}"
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception:
+        return generate_performance_analysis(student_name, exam_type, subject, chapter_analysis, percentage, model_index + 1)

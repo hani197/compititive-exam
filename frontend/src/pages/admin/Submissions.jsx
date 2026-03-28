@@ -8,6 +8,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { withAdmin } from '../../components/withAuth';
 import api from '../../lib/api';
 
@@ -16,6 +17,7 @@ function Submissions() {
   const [loading, setLoading] = useState(true);
   const [selectedResult, setSelectedResult] = useState(null);
   const [confirming, setConfirming] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState('');
 
   const fetchResults = async () => {
@@ -41,6 +43,20 @@ function Submissions() {
       alert('Confirmation failed.');
     } finally {
       setConfirming(false);
+    }
+  };
+
+  const handleRegenerate = async (id) => {
+    setRegenerating(true);
+    try {
+      const res = await api.post(`results/${id}/regenerate_analysis/`);
+      const newFeedback = res.data.feedback;
+      setSelectedResult(prev => ({ ...prev, ai_overall_feedback: newFeedback }));
+      fetchResults();
+    } catch (err) {
+      alert('Regeneration failed.');
+    } finally {
+      setRegenerating(false);
     }
   };
 
@@ -141,8 +157,17 @@ function Submissions() {
 
       {selectedResult && (
         <Dialog open={true} onClose={() => setSelectedResult(null)} maxWidth="md" fullWidth>
-          <DialogTitle sx={{ borderBottom: '1px solid #f1f5f9' }}>
-            Performance Analysis: {selectedResult.student_name}
+          <DialogTitle sx={{ borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" fontWeight={700}>Performance Analysis: {selectedResult.student_name}</Typography>
+            <Button 
+              size="small" 
+              startIcon={regenerating ? <CircularProgress size={16} /> : <AutoAwesomeIcon />} 
+              onClick={() => handleRegenerate(selectedResult.id)}
+              disabled={regenerating}
+              sx={{ fontWeight: 700 }}
+            >
+              Regenerate AI
+            </Button>
           </DialogTitle>
           <DialogContent sx={{ p: 3 }}>
             <Stack spacing={3} sx={{ mt: 1 }}>
