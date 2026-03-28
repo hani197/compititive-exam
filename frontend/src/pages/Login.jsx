@@ -29,17 +29,26 @@ export default function LoginPage() {
       console.log('Login successful, user role:', user.role);
       
       if (user.role === 'admin' || user.is_staff) {
-        console.log('Admin detected, performing hard redirect to submissions...');
         window.location.href = '/admin/submissions';
       } else {
-        console.log('Student detected, navigating to dashboard...');
         navigate('/dashboard');
       }
     } catch (err) {
       console.error('Login submit error:', err);
-      setError(err.response?.data?.detail || 'Invalid username or password.');
+      const detail = err.response?.data?.detail || err.response?.data?.error || JSON.stringify(err.response?.data);
+      setError(`Login Failed: ${detail || 'Invalid username or password.'}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetAdmin = async () => {
+    try {
+      const resetUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}`.replace('/api', '') + '/maintenance/reset-admin/';
+      window.open(resetUrl, '_blank');
+      setError('Check the new tab for reset status, then try logging in.');
+    } catch (err) {
+      setError('Could not open reset link.');
     }
   };
 
@@ -151,13 +160,21 @@ export default function LoginPage() {
           </form>
 
           <Box sx={{ mt: 4, pt: 3, borderTop: '1.5px dashed rgba(167,139,250,0.3)', textAlign: 'center' }}>
-            <Typography variant="body2" color="#7c3aed" fontWeight={500}>
+            <Typography variant="body2" color="#7c3aed" fontWeight={500} mb={1}>
               Own a coaching centre?{' '}
               <Button size="small" onClick={() => navigate('/register-centre')}
                 sx={{ fontWeight: 800, color: '#5b21b6', p: 0, minWidth: 0, textDecoration: 'underline', textUnderlineOffset: 3 }}>
                 Register here
               </Button>
             </Typography>
+            
+            <Button 
+              size="small" 
+              onClick={handleResetAdmin}
+              sx={{ color: 'text.secondary', fontSize: '0.7rem', opacity: 0.7, '&:hover': { opacity: 1 } }}
+            >
+              Emergency: Reset Admin Password
+            </Button>
           </Box>
         </Box>
       </Box>
