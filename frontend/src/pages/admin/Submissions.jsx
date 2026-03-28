@@ -149,7 +149,7 @@ function Submissions() {
               <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2 }}>
                 <Typography variant="subtitle2" fontWeight={700} gutterBottom>AI Summary</Typography>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {selectedResult.ai_overall_feedback || selectedResult.ai_analysis || 'No analysis available.'}
+                  {selectedResult.ai_overall_feedback || selectedResult.ai_analysis || selectedResult.recommendations || 'No analysis available.'}
                 </Typography>
               </Box>
               
