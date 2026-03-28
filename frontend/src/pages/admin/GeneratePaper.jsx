@@ -118,7 +118,9 @@ function GeneratePaperPage() {
       setGeneratedPaper(res.data);
       setExpanded('panel3');
     } catch (err) {
-      setError(err.response?.data?.error || 'AI generation failed.');
+      const errorMsg = err.response?.data?.error || err.message || 'AI generation failed.';
+      const detailMsg = err.response?.data?.details ? `\n\nDetails: ${err.response.data.details}` : '';
+      setError(errorMsg + detailMsg);
     } finally { setLoading(false); }
   };
 

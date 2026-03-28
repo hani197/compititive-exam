@@ -14,6 +14,7 @@ if not api_key:
     api_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
 
 if api_key:
+    print(f"DEBUG: GEMINI_API_KEY loaded successfully (length: {len(api_key)})")
     genai.configure(api_key=api_key)
 else:
     print("CRITICAL: No GEMINI_API_KEY found in settings or environment.")
