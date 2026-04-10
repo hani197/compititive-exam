@@ -125,7 +125,7 @@ export default function LoginPage() {
       }}>
         <Box sx={{ width: '100%', maxWidth: 400 }}>
           <Typography variant="h4" fontWeight={800} mb={0.5}
-            sx={{ background: 'linear-gradient(135deg, #3b0764, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            sx={{ background: 'linear-gradient(135deg, #3b0764, #69316f)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             Welcome back!
           </Typography>
           <Typography color="text.secondary" mb={4} fontWeight={500}>

@@ -270,14 +270,20 @@ function RegisterUser() {
                       )}
 
                       <FormControl fullWidth size="small">
-                        <InputLabel>
-                          {examTypes.length > 0 
-                            ? `Exam Program (${examTypes.length} found)` 
-                            : 'Exam Program (None found)'}
-                        </InputLabel>
-                        <Select value={form.exam_type} label={examTypes.length > 0 ? 'Exam Program' : 'Exam Program (None found)'} onChange={set('exam_type')}>
+                        <InputLabel id="exam-program-label">Exam Program</InputLabel>
+                        <Select 
+                          labelId="exam-program-label"
+                          value={form.exam_type} 
+                          label="Exam Program" 
+                          onChange={set('exam_type')}
+                        >
                           {examTypes.map(e => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
                         </Select>
+                        {examTypes.length > 0 && (
+                          <Typography variant="caption" sx={{ mt: 0.5, color: 'text.secondary', fontWeight: 600, px: 1 }}>
+                            {examTypes.length} programs available
+                          </Typography>
+                        )}
                       </FormControl>
                     </Box>
                   )}
