@@ -44,26 +44,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleTestConnection = async () => {
-    try {
-      const pingUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}`.replace('/api', '') + '/maintenance/ping/';
-      const res = await axios.get(pingUrl);
-      alert(`Connection Success! Backend reached at: ${pingUrl}\nStatus: ${res.status} (${res.data.message})`);
-    } catch (err) {
-      alert(`Connection Failed! Error: ${err.message}\nCheck your Vercel VITE_API_URL.`);
-    }
-  };
-
-  const handleResetAdmin = async () => {
-    try {
-      const resetUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}`.replace('/api', '') + '/maintenance/reset-admin/';
-      window.open(resetUrl, '_blank');
-      setError('Check the new tab for reset status, then try logging in.');
-    } catch (err) {
-      setError('Could not open reset link.');
-    }
-  };
-
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex' }}>
       {/* Left — vibrant gradient panel */}
@@ -179,25 +159,6 @@ export default function LoginPage() {
                 Register here
               </Button>
             </Typography>
-            
-            <Button 
-              size="small" 
-              onClick={handleResetAdmin}
-              sx={{ color: 'text.secondary', fontSize: '0.7rem', opacity: 0.7, '&:hover': { opacity: 1 } }}
-            >
-              Emergency: Reset Admin Password
-            </Button>
-            <Box mt={1.5}>
-              <Button 
-                fullWidth
-                variant="outlined"
-                size="small"
-                onClick={handleTestConnection}
-                sx={{ color: '#7c3aed', borderColor: '#7c3aed', fontSize: '0.75rem', fontWeight: 800, py: 1 }}
-              >
-                Diagnostic: Test Backend Connection
-              </Button>
-            </Box>
           </Box>
         </Box>
       </Box>
