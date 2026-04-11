@@ -20,8 +20,8 @@ else:
 
 # Confirmed models available for this account
 MODELS_TO_TRY = [
-    'gemini-2.0-flash-lite',      # Highest quota limits
-    'gemini-flash-lite-latest',   # 1.5 Lite fallback
+    'gemini-1.5-flash',      # Highest quota limits
+    'gemini-1.5-pro',   # 1.5 Lite fallback
     'gemini-2.0-flash',           # Standard Flash
     'gemma-3-4b-it'               # Confirmed working in gemini.js
 ]
@@ -110,9 +110,9 @@ Return ONLY a JSON object with this exact structure:
         err_msg = str(e)
         print(f"ERROR with {model_name}: {err_msg}")
         if any(code in err_msg for code in ["429", "404", "400"]) or "quota" in err_msg.lower() or "blocked" in err_msg.lower():
-            return generate_exam_paper(exam_type, subject, chapters, total_questions, difficulty, mode, reference_papers, model_index + 1)
+            time.sleep(2); return generate_exam_paper(exam_type, subject, chapters, total_questions, difficulty, mode, reference_papers, model_index + 1)
         if total_questions > 2:
-             return generate_exam_paper(exam_type, subject, chapters, 2, difficulty, mode, reference_papers, model_index)
+             time.sleep(2); return generate_exam_paper(exam_type, subject, chapters, 2, difficulty, mode, reference_papers, model_index)
         raise e
 
 def evaluate_descriptive_answer(question: str, correct_answer: str, student_answer: str, marks: float, model_index: int = 0) -> dict:

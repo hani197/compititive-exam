@@ -8,12 +8,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['*']
 if not DEBUG:
     # Add common deployment domains if in production
     ALLOWED_HOSTS += ['.onrender.com', '.vercel.app']
     # Filter out empty strings
-    ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h]
+    ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
