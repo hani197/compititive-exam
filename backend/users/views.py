@@ -23,7 +23,7 @@ def maintenance_reset_admin(request):
     try:
         from .models import User
         u, created = User.objects.get_or_create(username='gen')
-        u.set_password('gen@1234')
+        u.set_password('gen@123')
         u.role = 'admin'
         u.is_staff = True
         u.is_superuser = True
